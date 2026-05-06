@@ -28,10 +28,9 @@ class Database:
     
     def _get_local_timezone(self):
         """获取本地时区"""
-        import time
-        import pytz
+        import datetime
         try:
-            return pytz.timezone(time.tzname[0] if time.tzname[0] else 'UTC')
+            return datetime.datetime.now().astimezone().tzinfo
         except Exception:
             return None
     
@@ -44,7 +43,7 @@ class Database:
             # 尝试使用本地时区
             local_tz = self._get_local_timezone()
             if local_tz:
-                local_date = local_tz.localize(date_obj)
+                local_date = date_obj.replace(tzinfo=local_tz)
                 start_of_day = int(local_date.timestamp())
             else:
                 # 如果无法获取本地时区，使用默认方式
@@ -68,8 +67,8 @@ class Database:
             # 尝试使用本地时区
             local_tz = self._get_local_timezone()
             if local_tz:
-                start_date_local = local_tz.localize(start_date)
-                end_date_local = local_tz.localize(end_date)
+                start_date_local = start_date.replace(tzinfo=local_tz)
+                end_date_local = end_date.replace(tzinfo=local_tz)
                 start_ts = int(start_date_local.timestamp())
                 end_ts = int(end_date_local.timestamp()) - 1  # 当月最后一秒
             else:
@@ -964,5 +963,4 @@ class Database:
         except sqlite3.Error as e:
             mk_logger.log_warn(f"increment_hit_count error: {e}")
             return False
-
 
