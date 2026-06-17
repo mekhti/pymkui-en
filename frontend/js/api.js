@@ -49,7 +49,7 @@ const Api = {
             const response = await fetch(url, mergedOptions);
             const data = await response.json();
             
-            // 任意接口返回 -100（未登录），保存新 cookie 并自动跳转登录页
+            // Any endpoint returns -100 (not logged in), save new cookie and auto-redirect to login page
             if (data.code === -100) {
                 if (data.cookie) {
                     this.setCookie(data.cookie);
@@ -66,7 +66,7 @@ const Api = {
         } catch (error) {
             return {
                 code: -1,
-                msg: error.message || '网络请求失败'
+                msg: error.message || 'Network request failed'
             };
         }
     },
@@ -234,10 +234,10 @@ const Api = {
     async login(secret, serverUrl) {
         this.setBaseUrl(serverUrl);
 
-        // 1. 检查是否有已保存的 cookie
+        // 1. Check for a saved cookie
         let cookie = this.getCookie();
 
-        // 2. 如果没有 cookie，调用 getApiList 获取
+        // 2. If there is no cookie, call getApiList to obtain
         if (!cookie) {
             const url1 = this.getUrl('/index/api/getApiList');
             try {
@@ -254,25 +254,25 @@ const Api = {
                     cookie = data1.cookie;
                     this.setCookie(cookie);
                 } else if (data1.code === 0) {
-                    // 已经登录
-                    return { success: true, msg: '已登录' };
+                    // Already logged in
+                    return { success: true, msg: 'Logged in' };
                 } else {
-                    return { success: false, msg: data1.msg || '获取 cookie 失败' };
+                    return { success: false, msg: data1.msg || 'Failed to get cookie' };
                 }
             } catch (error) {
-                return { success: false, msg: '网络请求失败: ' + error.message };
+                return { success: false, msg: 'Network request failed: ' + error.message };
             }
 
             if (!cookie) {
-                return { success: false, msg: '获取 cookie 失败' };
+                return { success: false, msg: 'Failed to get cookie' };
             }
         }
 
-        // 3. 计算 digest
+        // 3. Compute digest
         const digestStr = `zlmediakit:${secret}:${cookie}`;
         const digest = this.md5(digestStr);
 
-        // 4. 调用 login 接口
+        // 4. call login endpoint
         const url2 = this.getUrl('/index/api/login');
 
         try {
@@ -287,12 +287,12 @@ const Api = {
             const data2 = await response2.json();
 
             if (data2.code === 0) {
-                return { success: true, msg: '登录成功' };
+                return { success: true, msg: 'Login successful' };
             } else {
-                return { success: false, msg: data2.msg || '登录失败' };
+                return { success: false, msg: data2.msg || 'Login failed' };
             }
         } catch (error) {
-            return { success: false, msg: '登录请求失败: ' + error.message };
+            return { success: false, msg: 'Login request failed: ' + error.message };
         }
     },
 
@@ -382,7 +382,7 @@ const Api = {
     },
 
     async getSnap(url, timeoutSec = 5, expireSec = 3) {
-        // 构建GET请求的查询参数
+        // Build GET request query parameters
         const params = new URLSearchParams({
             url: url,
             timeout_sec: timeoutSec,
@@ -400,12 +400,12 @@ const Api = {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            // 处理二进制图片响应
+            // Handle binary image response
             const blob = await response.blob();
-            // 创建一个URL对象用于显示图片
+            // Create a URL object to display the image
             return { code: 0, data: URL.createObjectURL(blob) };
         } catch (error) {
-            return { code: -1, msg: error.message || '网络请求失败' };
+            return { code: -1, msg: error.message || 'Network request failed' };
         }
     },
 
@@ -487,13 +487,13 @@ async function checkAuth() {
         return false;
     }
 
-    // 加载已保存的服务器地址和 cookie
+    // Load saved server address and cookie
     Api.setBaseUrl(serverUrl);
     if (cookie) {
         Api.setCookie(cookie);
     }
 
-    // 检查是否已登录
+    // Check whether already logged in
     try {
         const result = await Api.getApiList();
         if (result.code === 0) {

@@ -5,7 +5,7 @@ async function loadNetwork() {
         <tr>
             <td colspan="8" class="p-10 text-center">
                 <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-                <span class="text-white/60 font-semibold">加载中...</span>
+                <span class="text-white/60 font-semibold">Loading...</span>
             </td>
         </tr>
     `;
@@ -13,18 +13,18 @@ async function loadNetwork() {
     try {
         const result = await Api.getNetworkList();
         
-        console.log('getNetworkList返回结果:', result);
+        console.log('getNetworkList returned result:', result);
         
         if (result.code === 0) {
             const data = result.data || [];
             
-            console.log('网络链接列表数据:', data);
+            console.log('Network connections list data:', data);
             
             if (data.length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="8" class="p-10 text-center text-white/60 font-semibold">
-                            暂无网络链接
+                            No network connections
                         </td>
                     </tr>
                 `;
@@ -33,7 +33,7 @@ async function loadNetwork() {
             
             let html = '';
             data.forEach(network => {
-                console.log('网络链接数据:', network);
+                console.log('Network connection data:', network);
                 
                 html += `
                     <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
@@ -45,7 +45,7 @@ async function loadNetwork() {
                         <td class="p-4 text-white">${network.peer_ip || '-'}</td>
                         <td class="p-4 text-white">${network.peer_port || '-'}</td>
                         <td class="p-4">
-                            <button class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:shadow-neon transition-colors" onclick="closeNetwork('${network.identifier || network.id}')">关闭</button>
+                            <button class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:shadow-neon transition-colors" onclick="closeNetwork('${network.identifier || network.id}')">Close</button>
                         </td>
                     </tr>
                 `;
@@ -56,7 +56,7 @@ async function loadNetwork() {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="8" class="p-10 text-center text-white/60 font-semibold">
-                        加载失败: ${result.msg || '未知错误'}
+                        Load failed: ${result.msg || 'Unknown error'}
                     </td>
                 </tr>
             `;
@@ -65,7 +65,7 @@ async function loadNetwork() {
         tbody.innerHTML = `
             <tr>
                 <td colspan="8" class="p-10 text-center text-white/60 font-semibold">
-                    网络错误: ${error.message}
+                    Network error: ${error.message}
                 </td>
             </tr>
         `;
@@ -73,50 +73,50 @@ async function loadNetwork() {
 }
 
 async function closeNetwork(identifier) {
-    // 显示确认弹窗
+    // Show confirmation dialog
     showConfirmModal(
-        '确认关闭链接',
-        `确定要关闭标识符为 ${identifier} 的网络链接吗？`,
+        'Confirm close connection',
+        `Are you sure you want to close the connection with identifier ${identifier}?`,
         async function() {
             try {
-                console.log('关闭网络链接:', identifier);
+                console.log('Close network connection:', identifier);
                 
-                // 关闭网络链接的API调用
+                // API call to close the network connection
                 const result = await Api.request('/index/api/kick_session', { body: { id: identifier } });
                 
                 if (result.code === 0) {
-                    showToast('关闭网络链接成功', 'success');
-                    // 重新加载网络链接列表
+                    showToast('Network connection closed', 'success');
+                    // Reload network connections list
                     loadNetwork();
                 } else {
-                    showToast('关闭网络链接失败: ' + (result.msg || '未知错误'), 'error');
+                    showToast('Failed to close network connection: ' + (result.msg || 'Unknown error'), 'error');
                 }
             } catch (error) {
-                console.error('关闭网络链接失败:', error);
-                showToast('关闭网络链接失败: ' + error.message, 'error');
+                console.error('Failed to close network connection:', error);
+                showToast('Failed to close network connection: ' + error.message, 'error');
             }
         }
     );
 }
 
-// 初始化网络链接页面
+// Initialize network connections page
 function initNetwork() {
-    // 首次加载数据
+    // Initial data load
     loadNetwork();
     
-    // 绑定刷新按钮事件
+    // Bind refresh button event
     const refreshBtn = document.getElementById('refreshNetwork');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', loadNetwork);
     }
 }
 
-// 清理网络链接页面资源
+// Clean up network connections page resources
 function cleanupNetwork() {
-    // 移除事件监听器等资源
+    // Remove event listeners and other resources
     const refreshBtn = document.getElementById('refreshNetwork');
     if (refreshBtn) {
-        // 移除事件监听器
+        // Remove event listener
         const newRefreshBtn = refreshBtn.cloneNode(true);
         refreshBtn.parentNode.replaceChild(newRefreshBtn, refreshBtn);
         newRefreshBtn.addEventListener('click', loadNetwork);

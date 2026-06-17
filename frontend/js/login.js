@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const serverUrl = window.location.origin;
 
-    // 检查是否已登录
+    // Check whether already logged in
     checkAuth().then(isAuth => {
         if (isAuth) {
-            showToast('已自动登录', 'success');
+            showToast('Auto-logged in', 'success');
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1000);
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const secret = secretInput.value.trim();
 
         if (!secret) {
-            showToast('请输入API密钥', 'warning');
+            showToast('Enter API key', 'warning');
             return;
         }
 
@@ -45,15 +45,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await Api.login(secret, serverUrl);
 
             if (result.success) {
-                showToast('登录成功', 'success');
+                showToast('Login successful', 'success');
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1000);
             } else {
-                showToast(result.msg || '登录失败', 'error');
+                showToast(result.msg || 'Login failed', 'error');
             }
         } catch (error) {
-            showToast('登录请求失败: ' + error.message, 'error');
+            showToast('Login request failed: ' + error.message, 'error');
         } finally {
             setLoading(false);
         }
@@ -77,10 +77,10 @@ function showToast(message, type = 'info') {
     
     toast.textContent = message;
     
-    // 移除所有类型类
+    // Remove all type classes
     toast.className = 'fixed top-5 right-5 z-50 px-6 py-4 rounded-xl text-white font-semibold shadow-xl backdrop-blur-lg transform translate-x-full opacity-0 transition-all duration-500 ease-out';
     
-    // 添加类型类
+    // Add type class
     let bgClass = '';
     switch (type) {
         case 'success':
@@ -98,12 +98,12 @@ function showToast(message, type = 'info') {
     
     toast.classList.add(...bgClass.split(' '));
     
-    // 显示toast
+    // Show toast
     setTimeout(() => {
         toast.classList.remove('translate-x-full', 'opacity-0');
     }, 100);
     
-    // 3秒后隐藏
+    // 3 seconds, then hide
     setTimeout(() => {
         toast.classList.add('translate-x-full', 'opacity-0');
     }, 3000);

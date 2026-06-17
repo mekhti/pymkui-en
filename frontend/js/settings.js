@@ -8,7 +8,7 @@ async function loadServerConfig() {
     container.innerHTML = `
         <div class="flex justify-center items-center h-64">
             <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-            <span class="text-white/60 font-semibold">加载中...</span>
+            <span class="text-white/60 font-semibold">Loading...</span>
         </div>
     `;
     
@@ -23,14 +23,14 @@ async function loadServerConfig() {
         } else {
             container.innerHTML = `
                 <div class="text-center p-10 text-white/60 font-semibold">
-                    加载配置失败: ${result.msg || '未知错误'}
+                    Failed to load config: ${result.msg || 'Unknown error'}
                 </div>
             `;
         }
     } catch (error) {
         container.innerHTML = `
             <div class="text-center p-10 text-white/60 font-semibold">
-                网络错误: ${error.message}
+                Network error: ${error.message}
             </div>
         `;
     }
@@ -50,7 +50,7 @@ function updateCategoryFilter() {
         }
     });
     
-    let html = '<option value="all">全部分类</option>';
+    let html = '<option value="all">All Categories</option>';
     Array.from(categories).sort().forEach(category => {
         html += `<option value="${category}">${category}</option>`;
     });
@@ -81,7 +81,7 @@ function renderConfig() {
     if (Object.keys(filteredItems).length === 0) {
         container.innerHTML = `
             <div class="text-center p-10 text-white/60 font-semibold">
-                没有找到匹配的配置项
+                No matching config items found
             </div>
         `;
         return;
@@ -92,9 +92,9 @@ function renderConfig() {
             <table class="w-full">
                 <thead>
                     <tr class="bg-white/10 border-b border-white/20">
-                        <th class="px-4 py-3 text-left text-white font-semibold w-1/3">配置项</th>
-                        <th class="px-4 py-3 text-left text-white font-semibold w-1/2">配置值</th>
-                        <th class="px-4 py-3 text-center text-white font-semibold w-1/6">操作</th>
+                        <th class="px-4 py-3 text-left text-white font-semibold w-1/3">Config Item</th>
+                        <th class="px-4 py-3 text-left text-white font-semibold w-1/2">Config Value</th>
+                        <th class="px-4 py-3 text-center text-white font-semibold w-1/6">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="configTableBody">
@@ -141,13 +141,13 @@ function renderConfigRow(key, value) {
                 <div class="flex items-center justify-center space-x-2">
                     <button onclick="resetConfig('${key}')" 
                             class="text-white/60 hover:text-white transition-colors p-2"
-                            title="重置">
+                            title="Reset">
                         <i class="fa fa-undo"></i>
                     </button>
                     <button onclick="saveConfig('${key}')" 
                             class="bg-gradient-primary text-white px-3 py-1 rounded text-sm font-semibold hover:shadow-neon transition-all"
-                            title="保存">
-                        保存
+                            title="Save">
+                        Save
                     </button>
                 </div>
             </td>
@@ -165,7 +165,7 @@ async function saveConfig(key) {
     const inputId = `input-${key.replace(/\./g, '-')}`;
     const input = document.getElementById(inputId);
     if (!input) {
-        showToast('找不到配置项', 'error');
+        showToast('Config item not found', 'error');
         return;
     }
     
@@ -175,14 +175,14 @@ async function saveConfig(key) {
         const result = await Api.setServerConfig({ [key]: value });
         
         if (result.code === 0) {
-            showToast('配置保存成功', 'success');
+            showToast('Config saved', 'success');
             allConfig[key] = value;
             input.setAttribute('data-original', value);
         } else {
-            showToast('配置保存失败: ' + (result.msg || '未知错误'), 'error');
+            showToast('Failed to save config: ' + (result.msg || 'Unknown error'), 'error');
         }
     } catch (error) {
-        showToast('保存配置失败: ' + error.message, 'error');
+        showToast('Failed to save config: ' + error.message, 'error');
     }
 }
 
@@ -193,7 +193,7 @@ function resetConfig(key) {
     
     const originalValue = input.getAttribute('data-original');
     input.value = originalValue;
-    showToast('已重置为原始值', 'info');
+    showToast('Reset to original value', 'info');
 }
 
 function searchConfig() {
