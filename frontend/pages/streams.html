@@ -4,25 +4,25 @@
             <div class="bg-white/20 w-10 h-10 rounded-full flex items-center justify-center">
                 <i class="fa fa-video-camera text-white text-xl"></i>
             </div>
-            <h2 class="text-2xl font-bold text-white">视频管理</h2>
+            <h2 class="text-2xl font-bold text-white">Streams</h2>
         </div>
         <div class="flex items-center flex-wrap gap-3">
             <div class="flex items-center space-x-2">
-                <label class="text-white font-semibold">虚拟主机:</label>
-                <input type="text" id="vhostFilter" placeholder="虚拟主机" value="__defaultVhost__" class="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary w-40">
+                <label class="text-white font-semibold">Virtual Host:</label>
+                <input type="text" id="vhostFilter" placeholder="Virtual Host" value="__defaultVhost__" class="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary w-40">
             </div>
             <div class="flex items-center space-x-2">
-                <label class="text-white font-semibold">应用:</label>
-                <input type="text" id="appFilter" placeholder="输入应用名" class="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary w-32">
+                <label class="text-white font-semibold">App:</label>
+                <input type="text" id="appFilter" placeholder="Enter app name" class="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary w-32">
             </div>
             <div class="flex items-center space-x-2">
-                <label class="text-white font-semibold">流ID:</label>
-                <input type="text" id="streamFilter" placeholder="输入流ID" class="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary w-32">
+                <label class="text-white font-semibold">Stream ID:</label>
+                <input type="text" id="streamFilter" placeholder="Enter stream ID" class="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary w-32">
             </div>
             <div class="flex items-center space-x-2">
-                <label class="text-white font-semibold">协议:</label>
+                <label class="text-white font-semibold">Protocol:</label>
                 <select id="protocolFilter" class="bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary">
-                    <option value="all" selected>全部</option>
+                    <option value="all" selected>All</option>
                     <option value="rtsp">RTSP</option>
                     <option value="rtmp">RTMP</option>
                     <option value="ts">TS</option>
@@ -32,7 +32,7 @@
                 </select>
             </div>
             <button id="refreshStreams" class="bg-gradient-primary text-white px-6 py-2 rounded-lg font-semibold hover:shadow-neon transition-all duration-300 hover:-translate-y-1">
-                <i class="fa fa-refresh mr-2"></i>刷新
+                <i class="fa fa-refresh mr-2"></i>Refresh
             </button>
         </div>
     </div>
@@ -42,23 +42,23 @@
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-white/10">
-                        <th class="text-left py-4 px-4 text-white font-semibold">虚拟主机</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">应用</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">流ID</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">协议</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">类型</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">观众数</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">在线时长</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">码率</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">轨道信息</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">操作</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Virtual Host</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">App</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Stream ID</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Protocol</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Type</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Viewers</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Uptime</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Bitrate</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Track Info</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="streamsTableBody">
                     <tr>
                         <td colspan="10" class="p-10 text-center">
                             <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-                            <span class="text-white/60 font-semibold">加载中...</span>
+                            <span class="text-white/60 font-semibold">Loading...</span>
                         </td>
                     </tr>
                 </tbody>

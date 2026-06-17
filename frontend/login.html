@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录 - ZLMediaKit 管理系统</title>
+    <title>Login - ZLMediaKit Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script>
@@ -73,7 +73,7 @@
     </style>
 </head>
 <body class="font-inter min-h-screen flex items-center justify-center bg-gradient-secondary relative overflow-hidden">
-    <!-- 背景装饰 -->
+    <!-- Background decoration -->
     <div class="absolute inset-0 z-0">
         <div class="absolute top-20 left-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
         <div class="absolute bottom-20 right-1/4 w-80 h-80 bg-secondary/20 rounded-full blur-3xl"></div>
@@ -82,9 +82,9 @@
 
     <div class="relative z-10 w-full max-w-md px-4">
         <div class="bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 overflow-hidden transition-all duration-500 hover:shadow-neon-lg hover:-translate-y-2">
-            <!-- 头部 -->
+            <!-- Header -->
             <div class="p-8">
-                <!-- 标题 -->
+                <!-- Title -->
                 <div class="text-center mb-10">
                     <div class="w-20 h-20 mx-auto mb-4 bg-gradient-primary rounded-2xl flex items-center justify-center animate-float animate-glow">
                         <i class="fa fa-play-circle text-white text-4xl"></i>
@@ -92,14 +92,14 @@
                     <h1 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-white mb-2">
                         ZLMediaKit
                     </h1>
-                    <p class="text-white/80 text-lg">媒体服务器管理系统</p>
+                    <p class="text-white/80 text-lg">Media Server Management System</p>
                 </div>
                 
-                <!-- 登录表单 -->
+                <!-- Login form -->
                 <form id="loginForm" class="space-y-6">
                     <div>
                         <label for="secret" class="block text-sm font-semibold text-white mb-2">
-                            API密钥
+                            API Key
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -109,7 +109,7 @@
                                 type="password" 
                                 id="secret" 
                                 name="secret" 
-                                placeholder="请输入API密钥"
+                                placeholder="Enter API key"
                                 required
                                 autocomplete="current-password"
                                 class="w-full h-12 pl-12 pr-12 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/60 focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all duration-300"
@@ -131,26 +131,26 @@
                     >
                         <span class="btn-text relative z-10 flex items-center justify-center gap-2">
                             <i class="fa fa-sign-in"></i>
-                            <span>登 录</span>
+                            <span>Log In</span>
                         </span>
                         <span class="btn-loading absolute inset-0 flex items-center justify-center gap-2 bg-gradient-primary hidden">
                             <div class="spinner w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            <span>登录中...</span>
+                            <span>Logging in...</span>
                         </span>
-                        <!-- 渐变效果 -->
+                        <!-- Gradient effect -->
                         <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </button>
                 </form>
                 
-                <!-- 页脚 -->
+                <!-- Footer -->
                 <div class="mt-8 text-center text-white/60 text-sm">
-                    <p>© 2026 ZLMediaKit. 保留所有权利</p>
+                    <p>© 2026 ZLMediaKit. All rights reserved</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 提示框 -->
+    <!-- Toast -->
     <div id="toast" class="fixed top-5 right-5 z-50 px-6 py-4 rounded-xl text-white font-semibold shadow-xl backdrop-blur-lg transform translate-x-full opacity-0 transition-all duration-500 ease-out">
     </div>
 

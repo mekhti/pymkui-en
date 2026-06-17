@@ -4,14 +4,14 @@
             <div class="bg-white/20 w-10 h-10 rounded-full flex items-center justify-center">
                 <i class="fa fa-cloud-download text-white text-xl"></i>
             </div>
-            <h2 class="text-2xl font-bold text-white">拉流代理</h2>
+            <h2 class="text-2xl font-bold text-white">Pull Proxy</h2>
         </div>
         <div class="flex items-center gap-3">
             <button id="refreshPullProxy" class="bg-white/10 text-white px-5 py-3 rounded-lg font-semibold hover:bg-white/20 transition-all duration-300 hover:-translate-y-1">
-                <i class="fa fa-refresh mr-2"></i>刷新
+                <i class="fa fa-refresh mr-2"></i>Refresh
             </button>
             <button class="bg-gradient-primary text-white px-6 py-3 rounded-lg font-semibold hover:shadow-neon transition-all duration-300 hover:-translate-y-1" onclick="openAddPullProxyModal()">
-                <i class="fa fa-plus mr-2"></i>新增拉流代理
+                <i class="fa fa-plus mr-2"></i>Add Pull Proxy
             </button>
         </div>
     </div>
@@ -22,28 +22,28 @@
                 <thead>
                     <tr class="border-b border-white/10">
                         <th class="text-left py-4 px-4 text-white font-semibold">ID</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">虚拟主机</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">应用</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">流ID</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">拉流地址</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">备注</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">按需</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">状态</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">创建时间</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">操作</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Virtual Host</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">App</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Stream ID</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Pull URL</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Note</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">On-demand</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Status</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Created At</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="pullProxyTableBody">
                     <tr>
                         <td colspan="10" class="p-10 text-center">
                             <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-                            <span class="text-white/60 font-semibold">加载中...</span>
+                            <span class="text-white/60 font-semibold">Loading...</span>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <!-- 分页 -->
+        <!-- Pagination -->
         <div id="pullProxyPagination" class="flex items-center justify-between mt-4 pt-4 border-t border-white/10 hidden">
             <span id="pullProxyPageInfo" class="text-white/50 text-sm"></span>
             <div class="flex items-center gap-2">

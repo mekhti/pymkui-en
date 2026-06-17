@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZLMediaKit 管理系统</title>
+    <title>ZLMediaKit Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
@@ -77,7 +77,7 @@
     </style>
 </head>
 <body class="font-inter min-h-screen bg-gradient-secondary relative overflow-hidden">
-    <!-- 背景装饰 -->
+    <!-- Background decoration -->
     <div class="absolute inset-0 z-0">
         <div class="absolute top-20 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
         <div class="absolute bottom-20 right-1/4 w-80 h-80 bg-secondary/20 rounded-full blur-3xl"></div>
@@ -85,9 +85,9 @@
     </div>
 
     <div class="flex h-screen">
-        <!-- 左侧菜单 -->
+        <!-- Left sidebar menu -->
         <div class="w-64 bg-white/10 backdrop-blur-xl shadow-lg z-30 border-r border-white/20">
-            <!-- 头部 -->
+            <!-- Header -->
             <div class="bg-gradient-primary h-16 flex items-center justify-center relative overflow-hidden">
                 <div class="absolute inset-0 animate-glow"></div>
                 <h1 class="text-white text-2xl font-bold z-10 flex items-center gap-2">
@@ -98,161 +98,161 @@
                 </h1>
             </div>
             
-            <!-- 菜单列表 -->
+            <!-- Menu list -->
             <nav class="py-4">
                 <ul>
                     <li>
                         <a href="#" data-page="dashboard" class="flex items-center px-6 py-4 text-white font-semibold text-lg border-l-4 border-primary bg-white/5 hover:bg-white/10 transition-all duration-300 hover:translate-x-2">
                             <i class="fa fa-dashboard text-xl mr-4"></i>
-                            <span>状态概览</span>
+                            <span>Dashboard</span>
                         </a>
                     </li>
                     <li>
                         <a href="#" data-page="network" class="flex items-center px-6 py-4 text-white/80 font-semibold text-lg border-l-4 border-transparent hover:bg-white/10 transition-all duration-300 hover:translate-x-2">
                             <i class="fa fa-link text-xl mr-4"></i>
-                            <span>连接管理</span>
+                            <span>Connections</span>
                         </a>
                     </li>
                     <li>
                         <a href="#" data-page="streams" class="flex items-center px-6 py-4 text-white/80 font-semibold text-lg border-l-4 border-transparent hover:bg-white/10 transition-all duration-300 hover:translate-x-2">
                             <i class="fa fa-video-camera text-xl mr-4"></i>
-                            <span>视频管理</span>
+                            <span>Streams</span>
                         </a>
                     </li>
                     <li>
                         <a href="#" data-page="pull-proxy" class="flex items-center px-6 py-4 text-white/80 font-semibold text-lg border-l-4 border-transparent hover:bg-white/10 transition-all duration-300 hover:translate-x-2">
                             <i class="fa fa-cloud-download text-xl mr-4"></i>
-                            <span>拉流代理</span>
+                            <span>Pull Proxy</span>
                         </a>
                     </li>
                     <li>
                         <a href="#" data-page="settings" class="flex items-center px-6 py-4 text-white/80 font-semibold text-lg border-l-4 border-transparent hover:bg-white/10 transition-all duration-300 hover:translate-x-2">
                             <i class="fa fa-cog text-xl mr-4"></i>
-                            <span>服务配置</span>
+                            <span>Service Config</span>
                         </a>
                     </li>
                     <li>
                         <a href="#" data-page="protocol-options" class="flex items-center px-6 py-4 text-white/80 font-semibold text-lg border-l-4 border-transparent hover:bg-white/10 transition-all duration-300 hover:translate-x-2">
                             <i class="fa fa-cogs text-xl mr-4"></i>
-                            <span>协议配置</span>
+                            <span>Protocol Config</span>
                         </a>
                     </li>
                     <li>
                         <a href="#" data-page="plugins" class="flex items-center px-6 py-4 text-white/80 font-semibold text-lg border-l-4 border-transparent hover:bg-white/10 transition-all duration-300 hover:translate-x-2">
                             <i class="fa fa-puzzle-piece text-xl mr-4"></i>
-                            <span>插件管理</span>
+                            <span>Plugins</span>
                         </a>
                     </li>
                     <li>
                         <a href="#" data-page="recordings" class="flex items-center px-6 py-4 text-white/80 font-semibold text-lg border-l-4 border-transparent hover:bg-white/10 transition-all duration-300 hover:translate-x-2">
                             <i class="fa fa-film text-xl mr-4"></i>
-                            <span>录像管理</span>
+                            <span>Recordings</span>
                         </a>
                     </li>
                     <li>
                         <a href="#" data-page="whip" class="flex items-center px-6 py-4 text-white/80 font-semibold text-lg border-l-4 border-transparent hover:bg-white/10 transition-all duration-300 hover:translate-x-2">
                             <i class="fa fa-podcast text-xl mr-4"></i>
-                            <span>在线推流</span>
+                            <span>Online Push</span>
                         </a>
                     </li>
                     <li class="mt-8">
                         <a href="javascript:;" id="logoutBtn" class="flex items-center px-6 py-4 text-rose-400 font-semibold text-lg border-l-4 border-transparent hover:bg-rose-400/10 transition-all duration-300 hover:translate-x-2">
                             <i class="fa fa-sign-out text-xl mr-4"></i>
-                            <span>退出登录</span>
+                            <span>Log Out</span>
                         </a>
                     </li>
                 </ul>
             </nav>
         </div>
         
-        <!-- 内容区域 -->
+        <!-- Content area -->
         <div class="flex-1 overflow-hidden flex flex-col relative" id="contentArea">
-            <!-- 标签页栏 -->
+            <!-- Tab bar -->
             <div class="bg-white/5 border-b border-white/10 px-4 py-2 flex items-center relative" style="z-index: 25;" id="tabBar">
                 <div class="flex items-center space-x-2 overflow-x-auto" id="tabs">
-                    <!-- 标签页将动态添加 -->
+                    <!-- Tabs added dynamically -->
                 </div>
             </div>
             
-            <!-- 页面内容区域 -->
+            <!-- Page content area -->
             <div class="flex-1 relative overflow-hidden" id="pageContent">
-                <!-- 概览页面 -->
+                <!-- Dashboard page -->
                 <div class="page absolute inset-0 flex flex-col" id="dashboard-page">
                     <div class="flex-1 overflow-y-auto p-6">
                         <div id="dashboard-content">
-                            <!-- 内容将通过AJAX加载 -->
+                            <!-- Content loaded via AJAX -->
                         </div>
                     </div>
                 </div>
                 
-                <!-- 流管理页面 -->
+                <!-- Streams page -->
                 <div class="page absolute inset-0 flex flex-col hidden" id="streams-page">
                     <div class="flex-1 overflow-y-auto p-6">
                         <div id="streams-content">
-                            <!-- 内容将通过AJAX加载 -->
+                            <!-- Content loaded via AJAX -->
                         </div>
                     </div>
                     <div id="streams-modal-container" class="absolute inset-0 pointer-events-none" style="z-index: 20;"></div>
                 </div>
                 
-                <!-- 拉流代理页面 -->
+                <!-- Pull proxy page -->
                 <div class="page absolute inset-0 flex flex-col hidden" id="pull-proxy-page">
                     <div class="flex-1 overflow-y-auto p-6">
                         <div id="pull-proxy-content">
-                            <!-- 内容将通过AJAX加载 -->
+                            <!-- Content loaded via AJAX -->
                         </div>
                     </div>
                     <div id="pull-proxy-modal-container" class="absolute inset-0 pointer-events-none" style="z-index: 20;"></div>
                 </div>
                 
-                <!-- 服务配置页面 -->
+                <!-- Service config page -->
                 <div class="page absolute inset-0 flex flex-col hidden" id="settings-page">
                     <div class="flex-1 overflow-y-auto p-6">
                         <div id="settings-content">
-                            <!-- 内容将通过AJAX加载 -->
+                            <!-- Content loaded via AJAX -->
                         </div>
                     </div>
                 </div>
                 
-                <!-- 在线推流页面 -->
+                <!-- Online push page -->
                 <div class="page absolute inset-0 flex flex-col hidden" id="whip-page">
                     <div class="flex-1 overflow-y-auto p-6">
                         <div id="whip-content">
-                            <!-- 内容将通过AJAX加载 -->
+                            <!-- Content loaded via AJAX -->
                         </div>
                     </div>
                 </div>
                 
-                <!-- 网络链接页面 -->
+                <!-- Network connections page -->
                 <div class="page absolute inset-0 flex flex-col hidden" id="network-page">
                     <div class="flex-1 overflow-y-auto p-6">
                         <div id="network-content">
-                            <!-- 内容将通过AJAX加载 -->
+                            <!-- Content loaded via AJAX -->
                         </div>
                     </div>
                 </div>
                 
-                <!-- 协议配置页面 -->
+                <!-- Protocol config page -->
                 <div class="page absolute inset-0 flex flex-col hidden" id="protocol-options-page">
                     <div class="flex-1 overflow-y-auto p-6">
                         <div id="protocol-options-content">
-                            <!-- 内容将通过AJAX加载 -->
+                            <!-- Content loaded via AJAX -->
                         </div>
                     </div>
                     <div id="protocol-options-modal-container" class="absolute inset-0 pointer-events-none" style="z-index: 20;"></div>
                 </div>
 
-                <!-- 插件管理页面 -->
+                <!-- Plugins page -->
                 <div class="page absolute inset-0 flex flex-col hidden" id="plugins-page">
                     <div class="flex-1 overflow-y-auto p-6">
                         <div id="plugins-content">
-                            <!-- 内容将通过AJAX加载 -->
+                            <!-- Content loaded via AJAX -->
                         </div>
                     </div>
                     <div id="plugins-modal-container" class="absolute inset-0 pointer-events-none" style="z-index: 20;"></div>
                 </div>
 
-                <!-- 录像管理页面 -->
+                <!-- Recordings page -->
                 <div class="page absolute inset-0 flex flex-col hidden" id="recordings-page">
                     <div class="flex-1 overflow-y-auto p-6">
                         <div id="recordings-content"></div>
@@ -263,7 +263,7 @@
         </div>
     </div>
     
-    <!-- Toast 通知 -->
+    <!-- Toast notification -->
     <div class="fixed top-4 right-4 z-50 transition-all duration-500 transform translate-x-full opacity-0" id="toast">
         <div class="px-6 py-4 rounded-xl shadow-xl backdrop-blur-md text-white font-semibold flex items-center gap-2">
             <i class="fa fa-info-circle"></i>

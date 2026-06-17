@@ -4,10 +4,10 @@
             <div class="bg-white/20 w-10 h-10 rounded-full flex items-center justify-center">
                 <i class="fa fa-link text-white text-xl"></i>
             </div>
-            <h2 class="text-2xl font-bold text-white">连接管理</h2>
+            <h2 class="text-2xl font-bold text-white">Connections</h2>
         </div>
         <button id="refreshNetwork" class="bg-gradient-primary text-white px-6 py-2 rounded-lg font-semibold hover:shadow-neon transition-all duration-300 hover:-translate-y-1">
-            <i class="fa fa-refresh mr-2"></i>刷新
+            <i class="fa fa-refresh mr-2"></i>Refresh
         </button>
     </div>
 
@@ -16,21 +16,21 @@
             <table class="w-full">
                 <thead>
                     <tr class="border-b border-white/10">
-                        <th class="text-left py-4 px-4 text-white font-semibold">标识符</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">类型ID</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">类型</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">本地IP</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">本地端口</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">远端IP</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">远端端口</th>
-                        <th class="text-left py-4 px-4 text-white font-semibold">操作</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Identifier</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Type ID</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Type</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Local IP</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Local Port</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Remote IP</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Remote Port</th>
+                        <th class="text-left py-4 px-4 text-white font-semibold">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="networkTableBody">
                     <tr>
                         <td colspan="8" class="p-10 text-center">
                             <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-                            <span class="text-white/60 font-semibold">加载中...</span>
+                            <span class="text-white/60 font-semibold">Loading...</span>
                         </td>
                     </tr>
                 </tbody>

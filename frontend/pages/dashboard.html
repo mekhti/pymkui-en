@@ -1,10 +1,10 @@
 <div class="space-y-6">
-    <!-- 统计卡片 -->
+    <!-- Stat cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="bg-gradient-primary rounded-xl p-6 shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-white/80 text-sm font-semibold">在线流数</p>
+                    <p class="text-white/80 text-sm font-semibold">Online Streams</p>
                     <h3 class="text-2xl font-bold text-white mt-1" id="streamCount">0</h3>
                 </div>
                 <div class="bg-white/20 p-3 rounded-full">
@@ -15,7 +15,7 @@
         <div class="bg-gradient-secondary rounded-xl p-6 shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-white/80 text-sm font-semibold">当前观众</p>
+                    <p class="text-white/80 text-sm font-semibold">Current Viewers</p>
                     <h3 class="text-2xl font-bold text-white mt-1" id="viewerCount">0</h3>
                 </div>
                 <div class="bg-white/20 p-3 rounded-full">
@@ -26,7 +26,7 @@
         <div class="bg-gradient-accent rounded-xl p-6 shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-white/80 text-sm font-semibold">流量统计</p>
+                    <p class="text-white/80 text-sm font-semibold">Traffic</p>
                     <div class="mt-1" id="trafficCount">-</div>
                 </div>
                 <div class="bg-white/20 p-3 rounded-full">
@@ -37,9 +37,9 @@
         <div class="bg-gradient-success rounded-xl p-6 shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-white/80 text-sm font-semibold" id="versionInfo">服务版本: -</p>
-                    <p class="text-white/70 text-xs mt-2" id="branchInfo">分支: -</p>
-                    <p class="text-white/70 text-xs mt-1" id="buildInfo">编译时间: -</p>
+                    <p class="text-white/80 text-sm font-semibold" id="versionInfo">Version: -</p>
+                    <p class="text-white/70 text-xs mt-2" id="branchInfo">Branch: -</p>
+                    <p class="text-white/70 text-xs mt-1" id="buildInfo">Build time: -</p>
                 </div>
                 <div class="bg-white/20 p-3 rounded-full">
                     <i class="fa fa-code text-white text-xl"></i>
@@ -48,51 +48,51 @@
         </div>
     </div>
 
-    <!-- 图表区域 -->
+    <!-- Chart area -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- 对象个数统计 -->
+        <!-- Object count -->
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-white/10">
-            <h3 class="text-lg font-semibold text-white mb-4">对象个数统计</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">Object count</h3>
             <div class="h-80">
                 <canvas id="statisticChart"></canvas>
             </div>
         </div>
 
-        <!-- 线程负载 -->
+        <!-- Thread load -->
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-white/10">
-            <h3 class="text-lg font-semibold text-white mb-4">线程负载</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">Thread load</h3>
             <div class="h-80">
                 <canvas id="threadsLoadChart"></canvas>
             </div>
         </div>
 
-        <!-- 工作线程负载 -->
+        <!-- Worker thread load -->
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-white/10">
-            <h3 class="text-lg font-semibold text-white mb-4">工作线程负载</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">Worker thread load</h3>
             <div class="h-80">
                 <canvas id="workThreadsLoadChart"></canvas>
             </div>
         </div>
 
-        <!-- CPU和内存 -->
+        <!-- CPU and memory -->
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-white/10">
-            <h3 class="text-lg font-semibold text-white mb-4">CPU和内存</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">CPU and memory</h3>
             <div class="h-80">
                 <canvas id="cpuMemoryChart"></canvas>
             </div>
         </div>
 
-        <!-- 磁盘 -->
+        <!-- Disk -->
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-white/10">
-            <h3 class="text-lg font-semibold text-white mb-4">磁盘</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">Disk</h3>
             <div class="h-80">
                 <canvas id="diskChart"></canvas>
             </div>
         </div>
 
-        <!-- 网络 -->
+        <!-- Network -->
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-white/10">
-            <h3 class="text-lg font-semibold text-white mb-4">网络收发速度</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">Network throughput</h3>
             <div class="h-80">
                 <canvas id="networkChart"></canvas>
             </div>

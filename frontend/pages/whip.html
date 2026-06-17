@@ -1,47 +1,47 @@
 <div class="space-y-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- 本地预览 -->
+        <!-- Local Preview -->
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-white/10">
-            <h3 class="text-lg font-semibold text-white mb-4">本地预览</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">Local Preview</h3>
             <div class="bg-black rounded-lg overflow-hidden h-96">
                 <video id="localVideo" autoplay muted class="w-full h-full object-contain"></video>
             </div>
         </div>
 
-        <!-- 推流设置 -->
+        <!-- Push Settings -->
         <div class="bg-white/5 rounded-xl p-6 shadow-lg border border-white/10">
-            <h3 class="text-lg font-semibold text-white mb-4">推流设置</h3>
+            <h3 class="text-lg font-semibold text-white mb-4">Push Settings</h3>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-white font-semibold mb-2">应用名称</label>
+                    <label class="block text-white font-semibold mb-2">App Name</label>
                     <input type="text" id="appName" value="live" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
                 <div>
-                    <label class="block text-white font-semibold mb-2">流名称</label>
+                    <label class="block text-white font-semibold mb-2">Stream Name</label>
                     <input type="text" id="streamName" value="test" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
                 <div>
-                    <label class="block text-white font-semibold mb-2">推流地址</label>
+                    <label class="block text-white font-semibold mb-2">Push URL</label>
                     <input type="text" id="whipUrl" readonly class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
                 <div>
-                    <label class="block text-white font-semibold mb-2">视频设备</label>
+                    <label class="block text-white font-semibold mb-2">Video Device</label>
                     <select id="videoDevice" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary">
-                        <option value="">点击开始推流后授权</option>
+                        <option value="">Authorize after starting push</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-white font-semibold mb-2">音频设备</label>
+                    <label class="block text-white font-semibold mb-2">Audio Device</label>
                     <select id="audioDevice" class="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary">
-                        <option value="">点击开始推流后授权</option>
+                        <option value="">Authorize after starting push</option>
                     </select>
                 </div>
                 <div class="flex space-x-4">
                     <button id="startStream" class="flex-1 bg-gradient-primary text-white px-6 py-3 rounded-lg font-semibold hover:shadow-neon transition-all duration-300 hover:-translate-y-1">
-                        <i class="fa fa-play mr-2"></i>开始推流
+                        <i class="fa fa-play mr-2"></i>Start Push
                     </button>
                     <button id="stopStream" disabled class="flex-1 bg-gradient-secondary text-white px-6 py-3 rounded-lg font-semibold hover:shadow-neon transition-all duration-300 hover:-translate-y-1">
-                        <i class="fa fa-stop mr-2"></i>停止推流
+                        <i class="fa fa-stop mr-2"></i>Stop Push
                     </button>
                 </div>
             </div>
