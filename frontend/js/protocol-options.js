@@ -15,7 +15,7 @@ async function loadProtocolOptions() {
         <tr>
             <td colspan="4" class="p-10 text-center">
                 <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
-                <span class="text-white/60 font-semibold">加载中...</span>
+                <span class="text-white/60 font-semibold">Loading...</span>
             </td>
         </tr>
     `;
@@ -30,7 +30,7 @@ async function loadProtocolOptions() {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="4" class="p-10 text-center text-white/60 font-semibold">
-                            暂无协议配置
+                            No protocol configs
                         </td>
                     </tr>
                 `;
@@ -46,10 +46,10 @@ async function loadProtocolOptions() {
                         <td class="p-4 text-white">${option.created_at || '-'}</td>
                         <td class="p-4">
                             <button class="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:shadow-neon transition-colors mr-2" onclick="editProtocolOption(${option.id})">
-                                <i class="fa fa-edit mr-1"></i>编辑
+                                <i class="fa fa-edit mr-1"></i>Edit
                             </button>
                             <button class="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:shadow-neon transition-colors" onclick="deleteProtocolOption(${option.id}, '${option.name}')">
-                                <i class="fa fa-trash mr-1"></i>删除
+                                <i class="fa fa-trash mr-1"></i>Delete
                             </button>
                         </td>
                     </tr>
@@ -61,7 +61,7 @@ async function loadProtocolOptions() {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="4" class="p-10 text-center text-white/60 font-semibold">
-                        加载失败: ${result.msg || '未知错误'}
+                        Load failed: ${result.msg || 'Unknown error'}
                     </td>
                 </tr>
             `;
@@ -70,7 +70,7 @@ async function loadProtocolOptions() {
         tbody.innerHTML = `
             <tr>
                 <td colspan="4" class="p-10 text-center text-white/60 font-semibold">
-                    网络错误: ${error.message}
+                    Network error: ${error.message}
                 </td>
             </tr>
         `;
@@ -78,18 +78,18 @@ async function loadProtocolOptions() {
 }
 
 async function openAddModal() {
-    showProtocolOptionsModal('新增协议预设', null, {});
+    showProtocolOptionsModal('Add protocol preset', null, {});
 }
 
 function editProtocolOption(id) {
     Api.getProtocolOptions(id).then(result => {
         if (result.code !== 0) {
-            showToast('获取配置失败: ' + (result.msg || '未知错误'), 'error');
+            showToast('Failed to get config: ' + (result.msg || 'Unknown error'), 'error');
             return;
         }
-        showProtocolOptionsModal('编辑协议预设', result.data);
+        showProtocolOptionsModal('Edit protocol preset', result.data);
     }).catch(error => {
-        showToast('获取配置失败: ' + error.message, 'error');
+        showToast('Failed to get config: ' + error.message, 'error');
     });
 }
 
@@ -112,9 +112,9 @@ function showProtocolOptionsModal(title, data, serverConfig = {}) {
         <div>
             <label class="block text-white font-semibold mb-2">${label}</label>
             <select id="${id}" class="${iCls}" style="color:white;">
-                <option value="" ${!val ? 'selected' : ''}>默认</option>
-                <option value="1" ${val === '1' ? 'selected' : ''}>1 - 开启</option>
-                <option value="0" ${val === '0' ? 'selected' : ''}>0 - 关闭</option>
+                <option value="" ${!val ? 'selected' : ''}>Default</option>
+                <option value="1" ${val === '1' ? 'selected' : ''}>1 - On</option>
+                <option value="0" ${val === '0' ? 'selected' : ''}>0 - Off</option>
             </select>
         </div>`;
 
@@ -125,11 +125,11 @@ function showProtocolOptionsModal(title, data, serverConfig = {}) {
                 <div class="flex items-center gap-2">
                     <button type="button" id="poLoadDefaultBtn"
                         class="bg-white/10 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-white/20 transition-colors">
-                        <i class="fa fa-magic mr-1"></i>加载默认
+                        <i class="fa fa-magic mr-1"></i>Load defaults
                     </button>
                     <button type="button" id="poClearBtn"
                         class="bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-red-500/30 transition-colors">
-                        <i class="fa fa-eraser mr-1"></i>清空
+                        <i class="fa fa-eraser mr-1"></i>Clear
                     </button>
                     <button class="text-white/60 hover:text-white ml-1" onclick="this.closest('.absolute').remove()">
                         <i class="fa fa-times text-2xl"></i>
@@ -139,84 +139,84 @@ function showProtocolOptionsModal(title, data, serverConfig = {}) {
             <form id="protocolOptionsForm" class="space-y-6">
                 <input type="hidden" id="optionId" value="${data ? data.id : ''}">
 
-                <!-- 通用配置 -->
+                <!-- General config -->
                 <div class="bg-white/5 rounded-lg p-4">
-                    <h4 class="text-lg font-semibold text-white mb-4 border-b border-white/10 pb-2">通用配置</h4>
+                    <h4 class="text-lg font-semibold text-white mb-4 border-b border-white/10 pb-2">General config</h4>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-white font-semibold mb-2">预设名称(name) *</label>
+                            <label class="block text-white font-semibold mb-2">Preset name(name) *</label>
                             <input type="text" id="optionName" required value="${data ? data.name : ''}" class="${iCls}">
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-white font-semibold mb-2">时间戳覆盖(modify_stamp)</label>
+                                <label class="block text-white font-semibold mb-2">Timestamp override(modify_stamp)</label>
                                 <select id="modifyStamp" class="${iCls}" style="color:white;">
-                                    <option value="" ${!getValue('modify_stamp') ? 'selected' : ''}>默认</option>
-                                    <option value="0" ${getValue('modify_stamp') === '0' ? 'selected' : ''}>0 - 绝对时间戳</option>
-                                    <option value="1" ${getValue('modify_stamp') === '1' ? 'selected' : ''}>1 - 系统时间戳</option>
-                                    <option value="2" ${getValue('modify_stamp') === '2' ? 'selected' : ''}>2 - 相对时间戳</option>
+                                    <option value="" ${!getValue('modify_stamp') ? 'selected' : ''}>Default</option>
+                                    <option value="0" ${getValue('modify_stamp') === '0' ? 'selected' : ''}>0 - Absolute timestamp</option>
+                                    <option value="1" ${getValue('modify_stamp') === '1' ? 'selected' : ''}>1 - System timestamp</option>
+                                    <option value="2" ${getValue('modify_stamp') === '2' ? 'selected' : ''}>2 - Relative timestamp</option>
                                 </select>
                             </div>
-                            ${buildToggle('开启音频(enable_audio)', 'enableAudio', getValue('enable_audio'))}
+                            ${buildToggle('Enable audio(enable_audio)', 'enableAudio', getValue('enable_audio'))}
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            ${buildToggle('添加静音音频(add_mute_audio)', 'addMuteAudio', getValue('add_mute_audio'))}
-                            ${buildToggle('自动关闭(auto_close)', 'autoClose', getValue('auto_close'))}
+                            ${buildToggle('Add silent audio(add_mute_audio)', 'addMuteAudio', getValue('add_mute_audio'))}
+                            ${buildToggle('Auto close(auto_close)', 'autoClose', getValue('auto_close'))}
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-white font-semibold mb-2">断连续推延时(continue_push_ms，毫秒)</label>
+                                <label class="block text-white font-semibold mb-2">Reconnect continue-push delay(continue_push_ms, ms)</label>
                                 <input type="number" id="continuePushMs" value="${getValue('continue_push_ms')}" placeholder="15000" class="${iCls}">
                             </div>
                             <div>
-                                <label class="block text-white font-semibold mb-2">平滑发送间隔(paced_sender_ms，毫秒)</label>
+                                <label class="block text-white font-semibold mb-2">Paced sender interval(paced_sender_ms, ms)</label>
                                 <input type="number" id="pacedSenderMs" value="${getValue('paced_sender_ms')}" placeholder="0" class="${iCls}">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 转协议开关 -->
+                <!-- Remux toggles -->
                 <div class="bg-white/5 rounded-lg p-4">
-                    <h4 class="text-lg font-semibold text-white mb-4 border-b border-white/10 pb-2">转协议开关</h4>
+                    <h4 class="text-lg font-semibold text-white mb-4 border-b border-white/10 pb-2">Remux toggles</h4>
                     <div class="grid grid-cols-3 gap-4">
-                        ${buildToggle('开启HLS(enable_hls)', 'enableHls', getValue('enable_hls'))}
-                        ${buildToggle('开启HLS-FMP4(enable_hls_fmp4)', 'enableHlsFmp4', getValue('enable_hls_fmp4'))}
-                        ${buildToggle('开启MP4录制(enable_mp4)', 'enableMp4', getValue('enable_mp4'))}
-                        ${buildToggle('开启RTSP(enable_rtsp)', 'enableRtsp', getValue('enable_rtsp'))}
-                        ${buildToggle('开启RTMP/FLV(enable_rtmp)', 'enableRtmp', getValue('enable_rtmp'))}
-                        ${buildToggle('开启HTTP-TS(enable_ts)', 'enableTs', getValue('enable_ts'))}
-                        ${buildToggle('开启FMP4(enable_fmp4)', 'enableFmp4', getValue('enable_fmp4'))}
+                        ${buildToggle('Enable HLS(enable_hls)', 'enableHls', getValue('enable_hls'))}
+                        ${buildToggle('Enable HLS-FMP4(enable_hls_fmp4)', 'enableHlsFmp4', getValue('enable_hls_fmp4'))}
+                        ${buildToggle('Enable MP4 recording(enable_mp4)', 'enableMp4', getValue('enable_mp4'))}
+                        ${buildToggle('Enable RTSP(enable_rtsp)', 'enableRtsp', getValue('enable_rtsp'))}
+                        ${buildToggle('Enable RTMP/FLV(enable_rtmp)', 'enableRtmp', getValue('enable_rtmp'))}
+                        ${buildToggle('Enable HTTP-TS(enable_ts)', 'enableTs', getValue('enable_ts'))}
+                        ${buildToggle('Enable FMP4(enable_fmp4)', 'enableFmp4', getValue('enable_fmp4'))}
                     </div>
                 </div>
 
-                <!-- 按需转协议开关 -->
+                <!-- On-demand remux toggles -->
                 <div class="bg-white/5 rounded-lg p-4">
-                    <h4 class="text-lg font-semibold text-white mb-4 border-b border-white/10 pb-2">按需转协议开关</h4>
+                    <h4 class="text-lg font-semibold text-white mb-4 border-b border-white/10 pb-2">On-demand remux toggles</h4>
                     <div class="grid grid-cols-3 gap-4">
-                        ${buildToggle('HLS按需(hls_demand)', 'hlsDemand', getValue('hls_demand'))}
-                        ${buildToggle('RTSP按需(rtsp_demand)', 'rtspDemand', getValue('rtsp_demand'))}
-                        ${buildToggle('RTMP按需(rtmp_demand)', 'rtmpDemand', getValue('rtmp_demand'))}
-                        ${buildToggle('TS按需(ts_demand)', 'tsDemand', getValue('ts_demand'))}
-                        ${buildToggle('FMP4按需(fmp4_demand)', 'fmp4Demand', getValue('fmp4_demand'))}
+                        ${buildToggle('HLS on-demand(hls_demand)', 'hlsDemand', getValue('hls_demand'))}
+                        ${buildToggle('RTSP on-demand(rtsp_demand)', 'rtspDemand', getValue('rtsp_demand'))}
+                        ${buildToggle('RTMP on-demand(rtmp_demand)', 'rtmpDemand', getValue('rtmp_demand'))}
+                        ${buildToggle('TS on-demand(ts_demand)', 'tsDemand', getValue('ts_demand'))}
+                        ${buildToggle('FMP4 on-demand(fmp4_demand)', 'fmp4Demand', getValue('fmp4_demand'))}
                     </div>
                 </div>
 
-                <!-- 录制配置 -->
+                <!-- Recording config -->
                 <div class="bg-white/5 rounded-lg p-4">
-                    <h4 class="text-lg font-semibold text-white mb-4 border-b border-white/10 pb-2">录制配置</h4>
+                    <h4 class="text-lg font-semibold text-white mb-4 border-b border-white/10 pb-2">Recording config</h4>
                     <div class="grid grid-cols-2 gap-4">
-                        ${buildToggle('MP4计入观看数(mp4_as_player)', 'mp4AsPlayer', getValue('mp4_as_player'))}
+                        ${buildToggle('MP4 counts toward viewers(mp4_as_player)', 'mp4AsPlayer', getValue('mp4_as_player'))}
                         <div>
-                            <label class="block text-white font-semibold mb-2">MP4切片大小(mp4_max_second，秒)</label>
+                            <label class="block text-white font-semibold mb-2">MP4 segment size(mp4_max_second, sec)</label>
                             <input type="number" id="mp4MaxSecond" value="${getValue('mp4_max_second')}" placeholder="3600" class="${iCls}">
                         </div>
                         <div>
-                            <label class="block text-white font-semibold mb-2">MP4保存路径(mp4_save_path)</label>
+                            <label class="block text-white font-semibold mb-2">MP4 save path(mp4_save_path)</label>
                             <input type="text" id="mp4SavePath" value="${getValue('mp4_save_path')}" placeholder="./www" class="${iCls}">
                         </div>
                         <div>
-                            <label class="block text-white font-semibold mb-2">HLS保存路径(hls_save_path)</label>
+                            <label class="block text-white font-semibold mb-2">HLS save path(hls_save_path)</label>
                             <input type="text" id="hlsSavePath" value="${getValue('hls_save_path')}" placeholder="./www" class="${iCls}">
                         </div>
                     </div>
@@ -224,10 +224,10 @@ function showProtocolOptionsModal(title, data, serverConfig = {}) {
 
                 <div class="flex justify-end space-x-4 mt-6">
                     <button type="button" class="bg-white/10 text-white px-6 py-2 rounded-lg font-semibold hover:bg-white/20 transition-colors" onclick="this.closest('.absolute').remove()">
-                        取消
+                        Cancel
                     </button>
                     <button type="submit" class="bg-gradient-primary text-white px-6 py-2 rounded-lg font-semibold hover:shadow-neon transition-all duration-300">
-                        保存
+                        Save
                     </button>
                 </div>
             </form>
@@ -246,7 +246,7 @@ function showProtocolOptionsModal(title, data, serverConfig = {}) {
         }
     });
 
-    // ---- 字段 id 列表（用于加载默认 / 清空）----
+    // ---- Field id list (for load defaults / clear)----
     const _fieldMap = {
         modifyStamp:    'modify_stamp',
         enableAudio:    'enable_audio',
@@ -272,16 +272,16 @@ function showProtocolOptionsModal(title, data, serverConfig = {}) {
         hlsSavePath:    'hls_save_path',
     };
 
-    // 加载默认：实时请求服务器配置后填入各字段
+    // Load defaults: fetch server config in real time and fill each field
     document.getElementById('poLoadDefaultBtn').addEventListener('click', async function () {
         const btn = this;
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i>加载中...';
+        btn.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i>Loading...';
         try {
             const result = await Api.getServerConfig();
             if (result.code === 0 && result.data && result.data.length > 0) {
                 const raw = result.data[0] || {};
-                // 提取 protocol.xxx 键值
+                // Extract protocol.xxx key-values
                 const cfg = {};
                 for (const [key, value] of Object.entries(raw)) {
                     if (key.startsWith('protocol.')) {
@@ -297,28 +297,28 @@ function showProtocolOptionsModal(title, data, serverConfig = {}) {
                     }
                 });
                 if (applied > 0) {
-                    showToast(`已加载 ${applied} 个服务器默认值`, 'success');
+                    showToast(`Loaded ${applied} server default values`, 'success');
                 } else {
-                    showToast('服务器未返回 protocol.* 配置', 'warning');
+                    showToast('Server did not return protocol.* config', 'warning');
                 }
             } else {
-                showToast('获取服务器配置失败: ' + (result.msg || '未知错误'), 'error');
+                showToast('Failed to get server config: ' + (result.msg || 'Unknown error'), 'error');
             }
         } catch (e) {
-            showToast('获取服务器配置失败: ' + e.message, 'error');
+            showToast('Failed to get server config: ' + e.message, 'error');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fa fa-magic mr-1"></i>加载默认';
+            btn.innerHTML = '<i class="fa fa-magic mr-1"></i>Load defaults';
         }
     });
 
-    // 清空：将所有字段（除名称外）重置为空
+    // Clear: reset all fields (except name) to empty
     document.getElementById('poClearBtn').addEventListener('click', function () {
         Object.keys(_fieldMap).forEach(domId => {
             const el = document.getElementById(domId);
             if (el) el.value = '';
         });
-        showToast('已清空所有协议参数', 'info');
+        showToast('All protocol params cleared', 'info');
     });
     
     document.getElementById('protocolOptionsForm').addEventListener('submit', async function(e) {
@@ -328,7 +328,7 @@ function showProtocolOptionsModal(title, data, serverConfig = {}) {
         const name = document.getElementById('optionName').value;
         
         if (!name) {
-            showToast('预设名称不能为空', 'error');
+            showToast('Preset name cannot be empty', 'error');
             return;
         }
         
@@ -368,34 +368,34 @@ function showProtocolOptionsModal(title, data, serverConfig = {}) {
             }
             
             if (result.code === 0) {
-                showToast(id ? '修改成功' : '添加成功', 'success');
+                showToast(id ? 'Updated' : 'Added', 'success');
                 modal.remove();
                 loadProtocolOptions();
             } else {
-                showToast((id ? '修改失败' : '添加失败') + ': ' + (result.msg || '未知错误'), 'error');
+                showToast((id ? 'Update failed' : 'Add failed') + ': ' + (result.msg || 'Unknown error'), 'error');
             }
         } catch (error) {
-            showToast((id ? '修改失败' : '添加失败') + ': ' + error.message, 'error');
+            showToast((id ? 'Update failed' : 'Add failed') + ': ' + error.message, 'error');
         }
     });
 }
 
 async function deleteProtocolOption(id, name) {
     showConfirmModal(
-        '确认删除',
-        `确定要删除协议预设 "${name}" 吗？`,
+        'Confirm delete',
+        `Are you sure you want to delete protocol preset "${name}"?`,
         async function() {
             try {
                 const result = await Api.deleteProtocolOptions(id);
                 
                 if (result.code === 0) {
-                    showToast('删除成功', 'success');
+                    showToast('Deleted', 'success');
                     loadProtocolOptions();
                 } else {
-                    showToast('删除失败: ' + (result.msg || '未知错误'), 'error');
+                    showToast('Delete failed: ' + (result.msg || 'Unknown error'), 'error');
                 }
             } catch (error) {
-                showToast('删除失败: ' + error.message, 'error');
+                showToast('Delete failed: ' + error.message, 'error');
             }
         }
     );

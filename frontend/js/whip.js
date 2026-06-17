@@ -11,7 +11,7 @@ let whipState = {
 async function stopWhipStream() {
     try {
         if (whipState.locationUrl) {
-            console.log('发送WHIP停止请求到:', whipState.locationUrl);
+            console.log('Send WHIP stop request to:', whipState.locationUrl);
             await fetch(whipState.locationUrl, {
                 method: 'DELETE',
                 credentials: 'include'
@@ -45,10 +45,10 @@ async function stopWhipStream() {
             stopStreamBtn.disabled = true;
         }
         
-        console.log('推流已停止');
+        console.log('Push stopped');
         
     } catch (error) {
-        console.error('停止推流失败:', error);
+        console.error('Failed to stop push:', error);
     }
 }
 
@@ -59,13 +59,13 @@ function restoreWhipState() {
     
     if (whipState.localStream && localVideo) {
         localVideo.srcObject = whipState.localStream;
-        console.log('恢复本地预览成功');
+        console.log('Local preview restored');
     }
     
     if (startStreamBtn && stopStreamBtn) {
         startStreamBtn.disabled = whipState.isStreaming;
         stopStreamBtn.disabled = !whipState.isStreaming;
-        console.log('恢复按钮状态成功，推流状态:', whipState.isStreaming);
+        console.log('Button state restored, streaming state:', whipState.isStreaming);
     }
     
     const whipUrlInput = document.getElementById('whipUrl');
@@ -89,11 +89,11 @@ function initWhipStreaming() {
                 url += '&' + new URLSearchParams(result.data).toString();
             }
         } catch (e) {
-            console.warn('获取推流URL附加参数失败，使用默认地址:', e);
+            console.warn('Failed to get push URL extra params, using default address:', e);
         }
         whipState.whipUrl = url;
         document.getElementById('whipUrl').value = whipState.whipUrl;
-        console.log('更新推流地址:', whipState.whipUrl);
+        console.log('Update push URL:', whipState.whipUrl);
     };
     
     const initDeviceSelection = async () => {
@@ -103,24 +103,24 @@ function initWhipStreaming() {
             const hasPermission = devices.some(device => device.label);
             
             if (!hasPermission) {
-                console.log('没有设备权限，显示提示信息');
+                console.log('No device permission, showing hint');
                 const videoSelect = document.getElementById('videoDevice');
                 const audioSelect = document.getElementById('audioDevice');
                 
-                videoSelect.innerHTML = '<option value="">点击开始推流后授权</option>';
-                audioSelect.innerHTML = '<option value="">点击开始推流后授权</option>';
+                videoSelect.innerHTML = '<option value="">Authorize after starting push</option>';
+                audioSelect.innerHTML = '<option value="">Authorize after starting push</option>';
                 return;
             }
             
             const videoSelect = document.getElementById('videoDevice');
-            videoSelect.innerHTML = '<option value="">选择摄像头</option>';
+            videoSelect.innerHTML = '<option value="">Select camera</option>';
             
             let firstVideoDeviceId = '';
             devices.forEach(device => {
                 if (device.kind === 'videoinput') {
                     const option = document.createElement('option');
                     option.value = device.deviceId;
-                    option.text = device.label || `摄像头 ${videoSelect.options.length}`;
+                    option.text = device.label || `Camera ${videoSelect.options.length}`;
                     videoSelect.appendChild(option);
                     
                     if (!firstVideoDeviceId) {
@@ -130,14 +130,14 @@ function initWhipStreaming() {
             });
             
             const audioSelect = document.getElementById('audioDevice');
-            audioSelect.innerHTML = '<option value="">选择麦克风</option>';
+            audioSelect.innerHTML = '<option value="">Select microphone</option>';
             
             let firstAudioDeviceId = '';
             devices.forEach(device => {
                 if (device.kind === 'audioinput') {
                     const option = document.createElement('option');
                     option.value = device.deviceId;
-                    option.text = device.label || `麦克风 ${audioSelect.options.length}`;
+                    option.text = device.label || `Microphone ${audioSelect.options.length}`;
                     audioSelect.appendChild(option);
                     
                     if (!firstAudioDeviceId) {
@@ -148,29 +148,29 @@ function initWhipStreaming() {
             
             if (firstVideoDeviceId) {
                 videoSelect.value = firstVideoDeviceId;
-                console.log('自动选择视频设备:', firstVideoDeviceId);
+                console.log('Auto-select video device:', firstVideoDeviceId);
             }
             
             if (firstAudioDeviceId) {
                 audioSelect.value = firstAudioDeviceId;
-                console.log('自动选择音频设备:', firstAudioDeviceId);
+                console.log('Auto-select audio device:', firstAudioDeviceId);
             }
             
         } catch (error) {
-            console.error('设备枚举失败:', error);
-            showToast('无法枚举设备', 'error');
+            console.error('Device enumeration failed:', error);
+            showToast('Cannot enumerate devices', 'error');
         }
     };
     
     const startStream = async () => {
         try {
-            console.log('开始推流...');
+            console.log('Start push...');
             
             let videoDevice = document.getElementById('videoDevice').value;
             let audioDevice = document.getElementById('audioDevice').value;
             
-            if (!videoDevice || videoDevice === '点击开始推流后授权') {
-                console.log('请求媒体设备权限...');
+            if (!videoDevice || videoDevice === 'Authorize after starting push') {
+                console.log('Requesting media device permission...');
                 try {
                     const tempStream = await navigator.mediaDevices.getUserMedia({ 
                         video: true, 
@@ -183,31 +183,31 @@ function initWhipStreaming() {
                     videoDevice = document.getElementById('videoDevice').value;
                     audioDevice = document.getElementById('audioDevice').value;
                     
-                    if (!videoDevice || videoDevice === '点击开始推流后授权') {
-                        showToast('请选择视频设备', 'error');
+                    if (!videoDevice || videoDevice === 'Authorize after starting push') {
+                        showToast('Please select a video device', 'error');
                         return;
                     }
                 } catch (error) {
-                    console.error('获取设备权限失败:', error);
-                    showToast('无法访问摄像头或麦克风，请检查权限设置', 'error');
+                    console.error('Failed to get device permission:', error);
+                    showToast('Cannot access camera or microphone, please check permission settings', 'error');
                     return;
                 }
             }
             
-            console.log('使用视频设备:', videoDevice, '音频设备:', audioDevice);
+            console.log('Using video device:', videoDevice, 'Audio device:', audioDevice);
             
-            console.log('正在获取本地媒体流...');
+            console.log('Getting local media stream...');
             whipState.localStream = await navigator.mediaDevices.getUserMedia({
                 video: { deviceId: videoDevice ? { exact: videoDevice } : true },
                 audio: audioDevice ? { deviceId: { exact: audioDevice } } : true
             });
-            console.log('成功获取本地媒体流，轨道数:', whipState.localStream.getTracks().length);
+            console.log('Got local media stream, track count:', whipState.localStream.getTracks().length);
             
             const localVideo = document.getElementById('localVideo');
             localVideo.srcObject = whipState.localStream;
-            console.log('本地预览已显示');
+            console.log('Local preview shown');
             
-            console.log('正在创建PeerConnection...');
+            console.log('Creating PeerConnection...');
             whipState.peerConnection = new RTCPeerConnection({
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' }
@@ -216,27 +216,27 @@ function initWhipStreaming() {
             
             whipState.peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
-                    console.log('生成ICE候选:', event.candidate);
+                    console.log('Generated ICE candidate:', event.candidate);
                 }
             };
             
             whipState.peerConnection.onconnectionstatechange = () => {
-                console.log('PeerConnection状态:', whipState.peerConnection.connectionState);
+                console.log('PeerConnection state:', whipState.peerConnection.connectionState);
             };
             
             whipState.localStream.getTracks().forEach(track => {
-                console.log('添加轨道到PeerConnection:', track.kind);
+                console.log('Add track to PeerConnection:', track.kind);
                 whipState.peerConnection.addTrack(track, whipState.localStream);
             });
             
-            console.log('正在生成SDP offer...');
+            console.log('Generating SDP offer...');
             const offer = await whipState.peerConnection.createOffer();
-            console.log('SDP offer生成成功');
+            console.log('SDP offer generated');
             await whipState.peerConnection.setLocalDescription(offer);
-            console.log('本地SDP设置成功');
+            console.log('Local SDP set successfully');
             
-            console.log('发送WHIP请求到:', whipState.whipUrl);
-            console.log('SDP内容长度:', offer.sdp.length);
+            console.log('Send WHIP request to:', whipState.whipUrl);
+            console.log('SDP content length:', offer.sdp.length);
             const response = await fetch(whipState.whipUrl, {
                 method: 'POST',
                 headers: {
@@ -246,45 +246,45 @@ function initWhipStreaming() {
                 credentials: 'include'
             });
             
-            console.log('WHIP服务器响应状态:', response.status);
-            console.log('WHIP服务器响应头:', Object.fromEntries(response.headers.entries()));
+            console.log('WHIP server response status:', response.status);
+            console.log('WHIP server response headers:', Object.fromEntries(response.headers.entries()));
             
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('WHIP服务器返回错误内容:', errorText);
-                throw new Error(`WHIP服务器返回错误: ${response.status} - ${errorText}`);
+                console.error('WHIP server returned error content:', errorText);
+                throw new Error(`WHIP server returned error: ${response.status} - ${errorText}`);
             }
             
             const location = response.headers.get('Location');
-            console.log('Location头:', location);
+            console.log('Location header:', location);
             if (!location) {
-                throw new Error('WHIP服务器未返回Location头');
+                throw new Error('WHIP server did not return Location header');
             }
             
             whipState.locationUrl = location;
             
             whipState.sessionId = location.split('/').pop();
-            console.log('获取到session ID:', whipState.sessionId);
-            console.log('保存Location URL:', whipState.locationUrl);
+            console.log('Got session ID:', whipState.sessionId);
+            console.log('Saved Location URL:', whipState.locationUrl);
             
             const answerSDP = await response.text();
-            console.log('SDP answer长度:', answerSDP.length);
+            console.log('SDP answer length:', answerSDP.length);
             await whipState.peerConnection.setRemoteDescription(new RTCSessionDescription({
                 type: 'answer',
                 sdp: answerSDP
             }));
-            console.log('远程SDP设置成功');
+            console.log('Remote SDP set successfully');
             
             whipState.isStreaming = true;
             
             document.getElementById('startStream').disabled = true;
             document.getElementById('stopStream').disabled = false;
-            showToast('推流已开始', 'success');
-            console.log('推流已成功开始');
+            showToast('Push started', 'success');
+            console.log('Push started successfully');
             
         } catch (error) {
-            console.error('开始推流失败:', error);
-            showToast('开始推流失败: ' + error.message, 'error');
+            console.error('Failed to start push:', error);
+            showToast('Failed to start push: ' + error.message, 'error');
             if (whipState.localStream) {
                 whipState.localStream.getTracks().forEach(track => track.stop());
                 whipState.localStream = null;
@@ -299,46 +299,46 @@ function initWhipStreaming() {
     
     const stopStream = async () => {
         await stopWhipStream();
-        showToast('推流已停止', 'success');
+        showToast('Push stopped', 'success');
     };
     
     const initEventListeners = () => {
-        console.log('开始初始化事件监听器...');
+        console.log('Start initializing event listeners...');
         
         const appNameInput = document.getElementById('appName');
         const streamNameInput = document.getElementById('streamName');
         
         if (appNameInput) {
             appNameInput.addEventListener('input', updateWhipUrl);
-            console.log('绑定appName输入事件监听器成功');
+            console.log('Bound appName input event listener');
         } else {
-            console.error('未找到appName元素');
+            console.error('appName element not found');
         }
         
         if (streamNameInput) {
             streamNameInput.addEventListener('input', updateWhipUrl);
-            console.log('绑定streamName输入事件监听器成功');
+            console.log('Bound streamName input event listener');
         } else {
-            console.error('未找到streamName元素');
+            console.error('streamName element not found');
         }
         
         const startStreamBtn = document.getElementById('startStream');
         if (startStreamBtn) {
             startStreamBtn.addEventListener('click', startStream);
-            console.log('绑定startStream按钮点击事件监听器成功');
+            console.log('Bound startStream button click event listener');
         } else {
-            console.error('未找到startStream按钮');
+            console.error('startStream button not found');
         }
         
         const stopStreamBtn = document.getElementById('stopStream');
         if (stopStreamBtn) {
             stopStreamBtn.addEventListener('click', stopStream);
-            console.log('绑定stopStream按钮点击事件监听器成功');
+            console.log('Bound stopStream button click event listener');
         } else {
-            console.error('未找到stopStream按钮');
+            console.error('stopStream button not found');
         }
         
-        console.log('事件监听器初始化完成');
+        console.log('Event listener initialization complete');
     };
     
     updateWhipUrl();

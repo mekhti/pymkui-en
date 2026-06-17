@@ -1,6 +1,6 @@
 async function loadDashboard() {
     try {
-        // 并行获取数据，提高性能
+        // Fetch data in parallel for better performance
         const [statisticResult, mediaResult, versionResult, threadsLoadResult, workThreadsLoadResult, hostStatsResult] = await Promise.all([
             Api.getStatistic(),
             Api.getMediaList(),
@@ -10,20 +10,20 @@ async function loadDashboard() {
             Api.getHostStats()
         ]);
         
-        // 处理统计数据
+        // Process statistics data
         if (statisticResult.code === 0) {
             const statisticData = statisticResult.data || {};
-            // 使用MultiMediaSourceMuxer个数作为在线流数
+            // Use MultiMediaSourceMuxer count as online stream count
             const streamCount = statisticData.MultiMediaSourceMuxer || 0;
             document.getElementById('streamCount').textContent = streamCount;
             
-            // 绘制统计图表
+            // Draw statistics chart
             drawStatisticChart(statisticData);
         } else {
             document.getElementById('streamCount').textContent = '0';
         }
         
-        // 处理媒体列表数据
+        // Process media list data
         if (mediaResult.code === 0) {
             const mediaData = mediaResult.data || [];
             let totalViewers = 0;
@@ -35,84 +35,84 @@ async function loadDashboard() {
             document.getElementById('viewerCount').textContent = '0';
         }
         
-        // 处理版本信息
+        // Process version info
         if (versionResult.code === 0) {
             const data = versionResult.data || {};
             const branchName = data.branchName || '-';
             const buildTime = data.buildTime || '-';
             const commitHash = data.commitHash || '-';
-            document.getElementById('versionInfo').textContent = `服务版本: ${commitHash}`;
-            document.getElementById('branchInfo').textContent = `分支: ${branchName}`;
-            document.getElementById('buildInfo').textContent = `编译时间: ${buildTime}`;
+            document.getElementById('versionInfo').textContent = `Version: ${commitHash}`;
+            document.getElementById('branchInfo').textContent = `Branch: ${branchName}`;
+            document.getElementById('buildInfo').textContent = `Build time: ${buildTime}`;
         } else {
-            document.getElementById('versionInfo').textContent = '服务版本: -';
-            document.getElementById('branchInfo').textContent = '分支: -';
-            document.getElementById('buildInfo').textContent = '编译时间: -';
+            document.getElementById('versionInfo').textContent = 'Version: -';
+            document.getElementById('branchInfo').textContent = 'Branch: -';
+            document.getElementById('buildInfo').textContent = 'Build time: -';
         }
         
-        // 处理线程负载数据
+        // Process thread load data
         if (threadsLoadResult.code === 0) {
             const data = threadsLoadResult.data || [];
             drawThreadsLoadChart(data);
         }
         
-        // 处理工作线程负载数据
+        // Process worker thread load data
         if (workThreadsLoadResult.code === 0) {
             const data = workThreadsLoadResult.data || [];
             drawWorkThreadsLoadChart(data);
         }
         
-        // 处理系统资源数据
+        // Process system resource data
         if (hostStatsResult.code === 0) {
             const data = hostStatsResult.data || {};
             
-            // 更新流量统计
+            // Update traffic stats
             const network = data.network || {};
             const sentTotal = network.sent_total || 0;
             const recvTotal = network.recv_total || 0;
             document.getElementById('trafficCount').innerHTML = `
-                <p class="text-white/70 text-xs">发送: ${formatBytes(sentTotal * 1024)}</p>
-                <p class="text-white/70 text-xs mt-1">接收: ${formatBytes(recvTotal * 1024)}</p>
+                <p class="text-white/70 text-xs">Sent: ${formatBytes(sentTotal * 1024)}</p>
+                <p class="text-white/70 text-xs mt-1">Received: ${formatBytes(recvTotal * 1024)}</p>
             `;
             
-            // 更新历史数据
+            // Update history data
             updateHistoryData(data);
             
-            // 绘制图表
+            // Draw chart
             drawCpuMemoryChart(data.memory || {});
             drawDiskChart(data.disk || {});
             drawNetworkChart(data.network || {});
         } else {
-            showToast('加载系统状态失败: ' + hostStatsResult.msg, 'error');
+            showToast('Failed to load system status: ' + hostStatsResult.msg, 'error');
         }
     } catch (error) {
-        showToast('加载数据失败: ' + error.message, 'error');
+        showToast('Failed to load data: ' + error.message, 'error');
         document.getElementById('streamCount').textContent = '0';
         document.getElementById('viewerCount').textContent = '0';
-        document.getElementById('versionInfo').textContent = '服务版本: -';
-        document.getElementById('branchInfo').textContent = '分支: -';
-        document.getElementById('buildInfo').textContent = '编译时间: -';
+        document.getElementById('versionInfo').textContent = 'Version: -';
+        document.getElementById('branchInfo').textContent = 'Branch: -';
+        document.getElementById('buildInfo').textContent = 'Build time: -';
     }
 }
 
-// 存储定时器ID
+// Store timerID
 let dashboardTimer = null;
 
-// 初始化dashboard，在dashboard.html加载完成后调用
+// Initialize dashboard, called after dashboard.html finishes loading
 function initDashboard() {
-    // 首次加载数据
+    // Initial data load
     loadDashboard();
     
-    // 清除之前的定时器
+    // Clear previous timer
     if (dashboardTimer) {
         clearInterval(dashboardTimer);
     }
     
-    // 设置3秒刷新一次状态
+    // Refresh status every 3 seconds
     dashboardTimer = setInterval(loadDashboard, 3000);
 }
 
-// 清理dashboard资源
+// Clean up dashboard resources
 function cleanupDashboard() {
     if (dashboardTimer) {
         clearInterval(dashboardTimer);
@@ -135,7 +135,7 @@ function drawStatisticChart(data) {
         data: {
             labels: labels,
             datasets: [{
-                label: '对象个数',
+                label: 'Object count',
                 data: values,
                 backgroundColor: 'rgba(75, 192, 192, 0.7)',
                 borderColor: 'rgba(75, 192, 192, 1)',
@@ -182,7 +182,7 @@ function drawStatisticChart(data) {
 function drawThreadsLoadChart(data) {
     const ctx = document.getElementById('threadsLoadChart').getContext('2d');
     
-    const labels = data.map(item => item.name || '未命名');
+    const labels = data.map(item => item.name || 'Unnamed');
     const loadData = data.map(item => (item.load || 0));
     const delayData = data.map(item => item.delay || 0);
     const fdCountData = data.map(item => item.fd_count || 0);
@@ -203,7 +203,7 @@ function drawThreadsLoadChart(data) {
             labels: labels,
             datasets: [
                 {
-                    label: '负载',
+                    label: 'Load',
                     data: loadData,
                     type: 'line',
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
@@ -216,7 +216,7 @@ function drawThreadsLoadChart(data) {
                     pointHoverRadius: 5
                 },
                 {
-                    label: '延迟',
+                    label: 'Latency',
                     data: delayData,
                     type: 'line',
                     backgroundColor: 'rgba(255, 206, 86, 0.2)',
@@ -229,7 +229,7 @@ function drawThreadsLoadChart(data) {
                     pointHoverRadius: 5
                 },
                 {
-                    label: 'FD数量',
+                    label: 'FD count',
                     data: fdCountScaled,
                     type: 'line',
                     backgroundColor: 'rgba(153, 102, 255, 0.2)',
@@ -258,7 +258,7 @@ function drawThreadsLoadChart(data) {
                     position: 'left',
                     title: {
                         display: true,
-                        text: '延迟',
+                        text: 'Latency',
                         color: 'rgba(255, 255, 255, 0.8)'
                     },
                     beginAtZero: true,
@@ -279,7 +279,7 @@ function drawThreadsLoadChart(data) {
                     position: 'right',
                     title: {
                         display: true,
-                        text: '负载',
+                        text: 'Load',
                         color: 'rgba(255, 255, 255, 0.8)'
                     },
                     beginAtZero: true,
@@ -314,8 +314,8 @@ function drawThreadsLoadChart(data) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            if (context.dataset.label === 'FD数量') {
-                                return 'FD数量: ' + fdCountData[context.dataIndex];
+                            if (context.dataset.label === 'FD count') {
+                                return 'FD count: ' + fdCountData[context.dataIndex];
                             }
                             return context.dataset.label + ': ' + context.parsed.y;
                         }
@@ -328,7 +328,7 @@ function drawThreadsLoadChart(data) {
                     const ctx = chart.ctx;
                     
                     chart.data.datasets.forEach(function(dataset, i) {
-                        if (dataset.label === 'FD数量') {
+                        if (dataset.label === 'FD count') {
                             const meta = chart.getDatasetMeta(i);
                             meta.data.forEach(function(point, index) {
                                 const data = fdCountData[index];
@@ -349,7 +349,7 @@ function drawThreadsLoadChart(data) {
 function drawWorkThreadsLoadChart(data) {
     const ctx = document.getElementById('workThreadsLoadChart').getContext('2d');
     
-    const labels = data.map(item => item.name || '未命名');
+    const labels = data.map(item => item.name || 'Unnamed');
     const loadData = data.map(item => (item.load || 0));
     const delayData = data.map(item => item.delay || 0);
     const fdCountData = data.map(item => item.fd_count || 0);
@@ -370,7 +370,7 @@ function drawWorkThreadsLoadChart(data) {
             labels: labels,
             datasets: [
                 {
-                    label: '负载',
+                    label: 'Load',
                     data: loadData,
                     type: 'line',
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
@@ -383,7 +383,7 @@ function drawWorkThreadsLoadChart(data) {
                     pointHoverRadius: 5
                 },
                 {
-                    label: '延迟',
+                    label: 'Latency',
                     data: delayData,
                     type: 'line',
                     backgroundColor: 'rgba(255, 206, 86, 0.2)',
@@ -396,7 +396,7 @@ function drawWorkThreadsLoadChart(data) {
                     pointHoverRadius: 5
                 },
                 {
-                    label: 'FD数量',
+                    label: 'FD count',
                     data: fdCountScaled,
                     type: 'line',
                     backgroundColor: 'rgba(153, 102, 255, 0.2)',
@@ -425,7 +425,7 @@ function drawWorkThreadsLoadChart(data) {
                     position: 'left',
                     title: {
                         display: true,
-                        text: '延迟',
+                        text: 'Latency',
                         color: 'rgba(255, 255, 255, 0.8)'
                     },
                     beginAtZero: true,
@@ -446,7 +446,7 @@ function drawWorkThreadsLoadChart(data) {
                     position: 'right',
                     title: {
                         display: true,
-                        text: '负载',
+                        text: 'Load',
                         color: 'rgba(255, 255, 255, 0.8)'
                     },
                     beginAtZero: true,
@@ -481,8 +481,8 @@ function drawWorkThreadsLoadChart(data) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            if (context.dataset.label === 'FD数量') {
-                                return 'FD数量: ' + fdCountData[context.dataIndex];
+                            if (context.dataset.label === 'FD count') {
+                                return 'FD count: ' + fdCountData[context.dataIndex];
                             }
                             return context.dataset.label + ': ' + context.parsed.y;
                         }
@@ -495,7 +495,7 @@ function drawWorkThreadsLoadChart(data) {
                     const ctx = chart.ctx;
                     
                     chart.data.datasets.forEach(function(dataset, i) {
-                        if (dataset.label === 'FD数量') {
+                        if (dataset.label === 'FD count') {
                             const meta = chart.getDatasetMeta(i);
                             meta.data.forEach(function(point, index) {
                                 const data = fdCountData[index];
@@ -513,7 +513,7 @@ function drawWorkThreadsLoadChart(data) {
     });
 }
 
-// 存储历史数据
+// Store history data
 let cpuHistory = Array(30).fill(0);
 let memoryHistory = Array(30).fill(0);
 let diskHistory = Array(30).fill(0);
@@ -521,7 +521,7 @@ let networkSentHistory = Array(30).fill(0);
 let networkRecvHistory = Array(30).fill(0);
 let timeLabels = Array(30).fill('');
 
-// 格式化字节数单位
+// Format byte units
 function formatBytes(bytes) {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -531,27 +531,27 @@ function formatBytes(bytes) {
 }
 
 function updateHistoryData(data) {
-    // 更新时间标签
+    // Update time label
     const time = data.time || '';
     timeLabels.shift();
     timeLabels.push(time);
     
-    // 更新CPU数据
+    // Update CPU data
     const cpu = data.cpu || 0;
     cpuHistory.shift();
     cpuHistory.push(cpu);
     
-    // 更新内存数据
+    // Update memory data
     const memoryUsed = data.memory?.used || 0;
     memoryHistory.shift();
     memoryHistory.push(memoryUsed);
     
-    // 更新磁盘数据
+    // Update disk data
     const diskUsed = data.disk?.used || 0;
     diskHistory.shift();
     diskHistory.push(diskUsed);
     
-    // 更新网络数据
+    // Update network data
     const networkSent = data.network?.sent || 0;
     networkSentHistory.shift();
     networkSentHistory.push(networkSent);
@@ -561,7 +561,7 @@ function updateHistoryData(data) {
     networkRecvHistory.push(networkRecv);
 }
 
-// 格式化存储单位
+// Format storage units
 function formatStorage(value) {
     if (value >= 1024) {
         return {
@@ -582,7 +582,7 @@ function drawCpuMemoryChart(memoryData = {}) {
     const formattedMemory = formatStorage(totalMemory);
     const maxMemory = Math.ceil(formattedMemory.value * 1.2);
     
-    // 格式化内存历史数据
+    // Format memory history data
     const formattedMemoryHistory = memoryHistory.map(value => {
         if (formattedMemory.unit === 'TB') {
             return value / 1024;
@@ -599,7 +599,7 @@ function drawCpuMemoryChart(memoryData = {}) {
         data: {
             labels: timeLabels,
             datasets: [{
-                label: 'CPU使用率',
+                label: 'CPU usage',
                 data: cpuHistory,
                 borderColor: 'rgba(75, 192, 192, 1)',
                 backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -607,7 +607,7 @@ function drawCpuMemoryChart(memoryData = {}) {
                 fill: true,
                 yAxisID: 'y'
             }, {
-                label: `内存使用 (${formattedMemory.unit})`,
+                label: `Memory usage (${formattedMemory.unit})`,
                 data: formattedMemoryHistory,
                 borderColor: 'rgba(54, 162, 235, 1)',
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
@@ -680,7 +680,7 @@ function drawDiskChart(diskData = {}) {
     const formattedDisk = formatStorage(totalDisk);
     const maxDisk = Math.ceil(formattedDisk.value * 1.2);
     
-    // 格式化磁盘历史数据
+    // Format disk history data
     const formattedDiskHistory = diskHistory.map(value => {
         if (formattedDisk.unit === 'TB') {
             return value / 1024;
@@ -697,7 +697,7 @@ function drawDiskChart(diskData = {}) {
         data: {
             labels: timeLabels,
             datasets: [{
-                label: `磁盘使用 (${formattedDisk.unit})`,
+                label: `Disk usage (${formattedDisk.unit})`,
                 data: formattedDiskHistory,
                 borderColor: 'rgba(255, 99, 132, 1)',
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -743,7 +743,7 @@ function drawDiskChart(diskData = {}) {
     });
 }
 
-// 格式化网络速率单位
+// Format network rate units
 function formatNetworkSpeed(value) {
     if (value >= 1024 * 1024) {
         return {
@@ -765,18 +765,18 @@ function formatNetworkSpeed(value) {
 function drawNetworkChart(networkData = {}) {
     const ctx = document.getElementById('networkChart').getContext('2d');
     
-    // 找出最大的网络速率值
+    // Find the maximum network rate value
     const maxSent = Math.max(...networkSentHistory);
     const maxRecv = Math.max(...networkRecvHistory);
     const maxSpeed = Math.max(maxSent, maxRecv);
     
-    // 格式化网络速率单位
+    // Format network rate units
     const formattedSpeed = formatNetworkSpeed(maxSpeed);
     
-    // 计算Y轴最大值
+    // Compute Y-axis maximum
     const maxY = Math.ceil(formattedSpeed.value * 1.2);
     
-    // 格式化历史数据
+    // Format history data
     const formattedSentHistory = networkSentHistory.map(value => {
         if (formattedSpeed.unit === 'GB/s') {
             return value / (1024 * 1024);
@@ -804,14 +804,14 @@ function drawNetworkChart(networkData = {}) {
         data: {
             labels: timeLabels,
             datasets: [{
-                label: `网络发送 (${formattedSpeed.unit})`,
+                label: `Network sent (${formattedSpeed.unit})`,
                 data: formattedSentHistory,
                 borderColor: 'rgba(255, 159, 64, 1)',
                 backgroundColor: 'rgba(255, 159, 64, 0.2)',
                 tension: 0.4,
                 fill: true
             }, {
-                label: `网络接收 (${formattedSpeed.unit})`,
+                label: `Network received (${formattedSpeed.unit})`,
                 data: formattedRecvHistory,
                 borderColor: 'rgba(153, 102, 255, 1)',
                 backgroundColor: 'rgba(153, 102, 255, 0.2)',
