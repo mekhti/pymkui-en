@@ -14,9 +14,9 @@ from starlette.routing import Match
 
 def submit_coro(scope, body, send):
     async def run():
-        # 包装 send 函数，确保它总是可等待的
+        # Wrap the send function to ensure it's always awaitable
         async def async_send(message):
-            # 调用原始的 send 函数，它现在应该返回一个协程
+            # Call the original send function; it should now return a coroutine
             result = send(message)
             if result is not None:
                 await result
@@ -32,7 +32,7 @@ def submit_coro(scope, body, send):
             await app(scope, receive, async_send)
         except Exception as e:
             mk_logger.log_warn(f"FastAPI failed: {e}")
-            # 发送错误响应
+            # Send an error response
             await async_send({
                 "type": "http.response.start",
                 "status": 500,
@@ -55,27 +55,27 @@ def check_route(scope) -> bool:
 
 def _resolve_ffmpeg_bin(configured: str) -> str:
     """
-    确保 ffmpeg 可执行文件路径有效。
-    1. 若配置的路径存在且可执行，直接返回。
-    2. 否则用 shutil.which 在 PATH 中查找（跨平台）。
-    3. Unix 下额外尝试 whereis 作为补充。
-    返回找到的路径，找不到返回空字符串。
+    Ensure the ffmpeg executable path is valid.
+    1. If the configured path exists and is executable, return it directly.
+    2. Otherwise use shutil.which to search in PATH (cross-platform).
+    3. On Unix, additionally try whereis as a supplement.
+    Return the path found, or an empty string if not found.
     """
-    # 1. 配置路径可用则直接返回
+    # 1. If the configured path is usable, return it directly
     if configured and os.path.isfile(configured) and os.access(configured, os.X_OK):
-        mk_logger.log_info(f"[ffmpeg] 使用已配置路径: {configured}")
+        mk_logger.log_info(f"[ffmpeg] Using configured path: {configured}")
         return configured
 
     if configured:
-        mk_logger.log_warn(f"[ffmpeg] 已配置路径不可用: {configured}，尝试自动查找")
+        mk_logger.log_warn(f"[ffmpeg] Configured path unusable: {configured}, trying auto-discovery")
 
-    # 2. shutil.which（跨平台，Windows 自动追加 .exe）
+    # 2. shutil.which (cross-platform; Windows auto-appends .exe)
     found = shutil.which("ffmpeg")
     if found:
-        mk_logger.log_info(f"[ffmpeg] PATH 中找到: {found}")
+        mk_logger.log_info(f"[ffmpeg] Found in PATH: {found}")
         return found
 
-    # 3. Unix 专属：whereis ffmpeg
+    # 3. Unix-specific: whereis ffmpeg
     if sys.platform != "win32":
         try:
             out = subprocess.check_output(
@@ -83,32 +83,32 @@ def _resolve_ffmpeg_bin(configured: str) -> str:
                 stderr=subprocess.DEVNULL,
                 timeout=5,
             ).decode().strip()
-            # 输出格式: "ffmpeg: /usr/bin/ffmpeg ..."
+            # Output format: "ffmpeg: /usr/bin/ffmpeg ..."
             parts = out.split(":")
             if len(parts) >= 2:
                 candidates = parts[1].split()
                 for candidate in candidates:
                     if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
-                        mk_logger.log_info(f"[ffmpeg] whereis 找到: {candidate}")
+                        mk_logger.log_info(f"[ffmpeg] whereis found: {candidate}")
                         return candidate
         except Exception as e:
-            mk_logger.log_warn(f"[ffmpeg] whereis 查找失败: {e}")
+            mk_logger.log_warn(f"[ffmpeg] whereis lookup failed: {e}")
 
     return ""
 
 
 def on_start():
-    # 加载插件并同步数据库绑定
+    # Load plugins and sync database bindings
     py_plugin.registry.load()
-    # 从 py_http_api 导入同步函数
+    # Import the sync function from py_http_api
     try:
         from py_http_api import _sync_bindings_from_db
         _sync_bindings_from_db()
     except Exception as e:
-        mk_logger.log_warn(f"[on_start] 同步插件绑定失败: {e}")
+        mk_logger.log_warn(f"[on_start] Failed to sync plugin bindings: {e}")
 
     mk_logger.log_info(f"on_start, secret: {mk_loader.get_config('api.secret')}")
-    # 设置http.rootPath为当前py文件的../frontend目录
+    # Set http.rootPath to the ../frontend directory relative to the current py file
     current_dir = os.path.dirname(os.path.abspath(__file__))
     frontend_path = os.path.abspath(os.path.join(current_dir, '..', 'frontend'))
     mk_loader.set_config('http.rootPath', frontend_path)
@@ -125,18 +125,18 @@ def on_start():
     mk_loader.update_config()
     mk_loader.set_fastapi(check_route, submit_coro)
 
-    # 派发 on_start 事件给插件（含 pull_proxy_restore 等）
+    # Dispatch the on_start event to plugins (including pull_proxy_restore, etc.)
     py_plugin.registry.dispatch("on_start")
 
 
 
 def _build_proxy_call_args(proxy: dict, url: str = "", url_params: dict = {}) -> tuple:
     """
-    从数据库代理记录中解析出 add_stream_proxy 所需的参数。
-    url      由调用方从 pull_proxy_urls.url 取得后传入。
-    url_params 由调用方从 pull_proxy_urls.params 取得后传入（已反序列化为 dict），
-               包含 schema、rtp_type 等地址级参数。
-    返回 (vhost, app, stream, url, retry_count, timeout_sec, opt)
+    Parse the params required by add_stream_proxy from the database proxy record.
+    url      is obtained by the caller from pull_proxy_urls.url and passed in.
+    url_params is obtained by the caller from pull_proxy_urls.params and passed in (already deserialized to dict),
+               containing address-level params such as schema, rtp_type, etc.
+    Returns (vhost, app, stream, url, retry_count, timeout_sec, opt)
     """
     vhost  = proxy.get("vhost")  or "__defaultVhost__"
     app    = proxy.get("app",    "")
@@ -149,7 +149,7 @@ def _build_proxy_call_args(proxy: dict, url: str = "", url_params: dict = {}) ->
         if not isinstance(custom_params_dict, dict):
             custom_params_dict = {}
     except Exception as e:
-        mk_logger.log_warn(f"[build_proxy_call_args] 解析 custom_params 失败 id={proxy.get('id')}: {e}")
+        mk_logger.log_warn(f"[build_proxy_call_args] Failed to parse custom_params id={proxy.get('id')}: {e}")
 
     retry_count = int(custom_params_dict.pop("retry_count",  -1))
     timeout_sec = float(custom_params_dict.pop("timeout_sec", 0.0))
@@ -161,9 +161,9 @@ def _build_proxy_call_args(proxy: dict, url: str = "", url_params: dict = {}) ->
         if isinstance(proto_dict, dict):
             opt.update(proto_dict)
     except Exception as e:
-        mk_logger.log_warn(f"[build_proxy_call_args] 解析 protocol_params 失败 id={proxy.get('id')}: {e}")
+        mk_logger.log_warn(f"[build_proxy_call_args] Failed to parse protocol_params id={proxy.get('id')}: {e}")
     opt.update(custom_params_dict)
-    # 地址级参数（schema、rtp_type 等）优先级最高，覆盖其他同名参数
+    # Address-level params (schema, rtp_type, etc.) have the highest priority and override other same-name params
     if url_params:
         opt.update({k: v for k, v in url_params.items() if v != '' and v is not None})
 
@@ -190,9 +190,9 @@ def on_player_proxy_failed(url: str, media_tuple: mk_loader.MediaTuple, ex: mk_l
 
 
 # ══════════════════════════════════════════════════════════════════════
-# 插件系统事件派发
-# 以下事件函数将优先尝试派发给已绑定的插件，插件返回 True 则接管，
-# 否则执行原有内置逻辑（若有），最后返回 False 交还 ZLM 处理。
+# Plugin system event dispatch
+# The following event functions first try to dispatch to bound plugins; if a plugin returns True it takes over,
+# otherwise the original built-in logic runs (if any), and finally returns False to hand back to ZLM.
 # ══════════════════════════════════════════════════════════════════════
 
 def on_publish(type: str, args: dict, invoker, sender: dict) -> bool:
