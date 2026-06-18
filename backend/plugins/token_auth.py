@@ -1,9 +1,9 @@
 """
-Token 鉴权插件（播放 + 推流）
-- PlayTokenAuth  : 处理 on_play，播放前校验 token
-- PublishTokenAuth: 处理 on_publish，推流前校验 token
+Token authentication plugin (play + publish)
+- PlayTokenAuth  : handles on_play, verifies the token before playback
+- PublishTokenAuth: handles on_publish, verifies the token before publishing
 
-两个插件共享 TokenAuthBase 基类，所有 token 生成/校验/过期逻辑在基类中实现。
+Both plugins share the TokenAuthBase base class; all token generation/verification/expiry logic is implemented in the base class.
 """
 
 import time
@@ -17,67 +17,67 @@ from py_plugin import PluginBase
 from urllib.parse import parse_qs
 
 
-# ── 公共基类 ─────────────────────────────────────────────────────────────────
+# ── Common base class ─────────────────────────────────────────────────────────────────
 
 class TokenAuthBase(PluginBase):
     """
-    Token 鉴权基类。
-    子类只需声明 name/description/type，以及实现 _allow(invoker) / _deny(invoker) 两个方法。
-    鉴权插件会调用 invoker（publish_auth_invoker_do / play_auth_invoker_do），
-    消费事件后不允许其他插件继续处理，因此 interruptible=True。
+    Token authentication base class.
+    Subclasses only need to declare name/description/type and implement the two methods _allow(invoker) / _deny(invoker).
+    The auth plugin calls invoker (publish_auth_invoker_do / play_auth_invoker_do),
+    After consuming the event, no other plugin is allowed to continue processing, hence interruptible=True.
     """
-    abstract = True   # 中间基类，不注册为实际插件
-    interruptible = True  # 鉴权插件：消费后终止后续插件
+    abstract = True   # intermediate base class, not registered as an actual plugin
+    interruptible = True  # auth plugin: terminates subsequent plugins after consuming
     _token: dict = {}
 
-    # ── 参数 schema ──────────────────────────────────────────────────────────
+    # ── Parameter schema ──────────────────────────────────────────────────────────
     def params(self) -> dict:
         return {
             "vhost_filter": {
                 "type": "str",
-                "description": "vhost 过滤规则，支持通配符 *，默认 * 匹配所有",
+                "description": "vhost filter rule; wildcard * supported; default * matches all",
                 "default": "*",
             },
             "app_filter": {
                 "type": "str",
-                "description": "app 过滤规则，支持通配符 *，默认 * 匹配所有",
+                "description": "app filter rule; wildcard * supported; default * matches all",
                 "default": "*",
             },
             "stream_filter": {
                 "type": "str",
-                "description": "stream 过滤规则，支持通配符 *，默认 * 匹配所有，例如 test* 匹配所有 test 开头的流",
+                "description": "stream filter rule; wildcard * supported; default * matches all; e.g. test* matches all streams starting with test",
                 "default": "*",
             },
             "expire_seconds": {
                 "type": "int",
-                "description": "token 过期时间（秒），默认 300 秒",
+                "description": "token expiry time (seconds), default 300 seconds",
                 "default": 300,
             },
             "token_length": {
                 "type": "int",
-                "description": "token 随机字符串长度，默认 16",
+                "description": "token random string length, default 16",
                 "default": 16,
             },
             "token_usage_count": {
                 "type": "int",
-                "description": "token 最大使用次数，-1 表示不限，默认 -1",
+                "description": "token max use count; -1 means unlimited; default -1",
                 "default": -1,
             },
             "allow_localhost": {
                 "type": "bool",
-                "description": "是否允许 localhost 访问忽略鉴权，默认 true",
+                "description": "whether to allow localhost access to bypass authentication, default true",
                 "default": True,
             },
         }
 
-    # ── 子类需要实现的钩子 ────────────────────────────────────────────────────
+    # ── Hooks subclasses must implement ────────────────────────────────────────────────────
     def _allow(self, invoker, extra: dict | None = None):
         raise NotImplementedError
 
     def _deny(self, invoker, reason: str = "token error"):
         raise NotImplementedError
 
-    # ── 核心逻辑 ──────────────────────────────────────────────────────────────
+    # ── Core logic ──────────────────────────────────────────────────────────────
     def run(self, **kwargs) -> bool:
         args           = kwargs.get("args", {})
         invoker        = kwargs.get("invoker")
@@ -86,13 +86,13 @@ class TokenAuthBase(PluginBase):
         vhost  = args.get("vhost", "__defaultVhost__")
         app    = args.get("app", "")
         stream = args.get("stream", "")
-        # 从sender获取客户端IP，支持IPv6
+        # Get the client IP from sender, IPv6 supported
         client_ip = ""
         sender = kwargs.get("sender")
         if isinstance(sender, dict) and "peer_ip" in sender:
             client_ip = sender.get("peer_ip", "")
 
-        # 通配符过滤：不命中则跳过，不消费事件
+        # Wildcard filtering: skip if no match, don't consume the event
         vhost_filter  = binding_params.get("vhost_filter",  "*") or "*"
         app_filter    = binding_params.get("app_filter",    "*") or "*"
         stream_filter = binding_params.get("stream_filter", "*") or "*"
@@ -105,7 +105,7 @@ class TokenAuthBase(PluginBase):
             )
             return False
 
-        # 检查是否是 localhost 访问
+        # Check whether it's localhost access
         allow_localhost = binding_params.get("allow_localhost", True)
         if isinstance(allow_localhost, str):
             allow_localhost = allow_localhost.lower() not in ('false', '0', '')
@@ -134,7 +134,7 @@ class TokenAuthBase(PluginBase):
         else:
             if token_usage_count > 0:
                 self._decr_usage(vhost, app, stream)
-            # 将 binding_params 透传给 _allow，供子类按需使用（如 PublishTokenAuth 的协议配置）
+            # Pass binding_params through to _allow for subclasses to use as needed (e.g. PublishTokenAuth's protocol config)
             self._allow(invoker, extra=binding_params)
         return True
 
@@ -144,7 +144,7 @@ class TokenAuthBase(PluginBase):
         stream = kwargs.get("stream", "")
         binding_params    = kwargs.get("binding_params", {})
 
-        # 不在过滤范围内则不追加 token 参数
+        # If not within the filter scope, don't append the token parameter
         vhost_filter  = binding_params.get("vhost_filter",  "*") or "*"
         app_filter    = binding_params.get("app_filter",    "*") or "*"
         stream_filter = binding_params.get("stream_filter", "*") or "*"
@@ -162,7 +162,7 @@ class TokenAuthBase(PluginBase):
                                token_usage_count=token_usage_count)
         return {"token": token}
 
-    # ── Token 管理 ────────────────────────────────────────────────────────────
+    # ── Token management ────────────────────────────────────────────────────────────
     @staticmethod
     def _random_string(length: int = 16) -> str:
         chars = string.ascii_letters + string.digits
@@ -199,18 +199,18 @@ class TokenAuthBase(PluginBase):
             del self._token[k]
 
 
-# ── 播放鉴权 ──────────────────────────────────────────────────────────────────
+# ── Play authentication ──────────────────────────────────────────────────────────────────
 
 class PlayTokenAuth(TokenAuthBase):
     name        = "play_token_auth"
     version     = "1.0.0"
-    description = "播放鉴权插件，鉴权失败后会拒绝播放请求。支持 vhost/app/stream 通配符过滤，可多次绑定针对不同流。"
+    description = "Play authentication plugin; rejects the play request when authentication fails. Supports vhost/app/stream wildcard filtering; can bind multiple times for different streams."
     type        = "on_play"
     interruptible = True
     multi_binding = True
     abstract    = False
 
-    _token: dict = {}   # 与 PublishTokenAuth 各自独立
+    _token: dict = {}   # independent from PublishTokenAuth
 
     def _allow(self, invoker, extra: dict | None = None):
         mk_loader.play_auth_invoker_do(invoker, "")
@@ -219,30 +219,30 @@ class PlayTokenAuth(TokenAuthBase):
         mk_loader.play_auth_invoker_do(invoker, reason)
 
 
-# ── 推流鉴权 ──────────────────────────────────────────────────────────────────
+# ── Publish authentication ──────────────────────────────────────────────────────────────────
 
 class PublishTokenAuth(TokenAuthBase):
     name        = "publish_token_auth"
     version     = "1.0.0"
-    description = "推流鉴权插件，鉴权失败后会拒绝推流请求。支持 vhost/app/stream 通配符过滤，可多次绑定针对不同流。可配置协议选项，鉴权通过后自动应用。"
+    description = "Publish authentication plugin; rejects the publish request when authentication fails. Supports vhost/app/stream wildcard filtering; can bind multiple times for different streams. Protocol options can be configured and are applied automatically after authentication passes."
     type        = "on_publish"
     interruptible = True
     multi_binding = True
     abstract    = False
 
-    _token: dict = {}   # 与 PlayTokenAuth 各自独立
+    _token: dict = {}   # independent from PlayTokenAuth
 
     def params(self) -> dict:
-        # 继承基类 token 参数，并追加鉴权开关和协议配置选择参数
+        # Inherit the base class token params and append auth-toggle and protocol-config selection params
         base = super().params()
         base["enable_auth"] = {
             "type": "bool",
-            "description": "是否启用 token 鉴权，关闭后仅应用协议配置，不校验 token",
+            "description": "whether to enable token authentication; when off, only the protocol config is applied and the token is not verified",
             "default": True,
         }
         base["protocol_option"] = {
             "type": "protocol_option",
-            "description": "推流鉴权通过（或鉴权关闭）后应用的协议配置（可选）",
+            "description": "protocol config applied after publish authentication passes (or auth is off) (optional)",
             "default": {},
         }
         return base
@@ -253,7 +253,7 @@ class PublishTokenAuth(TokenAuthBase):
         if isinstance(enable_auth, str):
             enable_auth = enable_auth.lower() not in ('false', '0', '')
         if not enable_auth:
-            # 鉴权关闭：直接放行，仅应用协议配置
+            # Auth off: allow directly, apply only the protocol config
             invoker = kwargs.get("invoker")
             args    = kwargs.get("args", {})
             vhost   = args.get("vhost", "__defaultVhost__")
@@ -274,7 +274,7 @@ class PublishTokenAuth(TokenAuthBase):
         return super().get_url_params(**kwargs)
 
     def _allow(self, invoker, extra: dict | None = None):
-        # 从 binding_params 中取出 protocol_option，直接传入（数据库保存时已只存协议字段）
+        # Take protocol_option out of binding_params and pass it in directly (only protocol fields are stored when saved to the database)
         protocol_opt: dict = {}
         if extra:
             raw = extra.get("protocol_option")
