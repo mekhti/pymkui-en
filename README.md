@@ -1,36 +1,36 @@
 # PyMKUI
 
-PyMKUI 是一个为 [ZLMediaKit](https://github.com/ZLMediaKit/ZLMediaKit) 设计的现代化 Web 管理界面，基于 Python 插件机制深度集成，提供直观、美观的流媒体服务器管理功能。
+PyMKUI is a modern web management interface for [ZLMediaKit](https://github.com/ZLMediaKit/ZLMediaKit). Built on deep integration through the Python plugin mechanism, it provides an intuitive, polished way to manage your streaming media server.
 
-> ⚠️ **项目正处于快速迭代期，数据库结构频繁变动。每次更新代码后请先删除旧数据库：**
+> ⚠️ **The project is under rapid development and the database schema changes frequently. After every code update, delete the old database first:**
 >
 > ```bash
 > rm data/pymkui.db
 > ```
 >
-> 数据库将在下次启动时自动重建。
+> The database is rebuilt automatically on the next start.
 
 ---
 
-## 功能特性
+## Features
 
-- 🎬 **视频流管理** — 查看、播放、停止流，获取截图
-- 📡 **拉流代理** — 多备用地址、按需/立即模式、自动故障切换、持久化恢复、在线编辑
-- 🔄 **转协议预设** — 保存多套转协议参数，拉流时一键加载，支持加载服务器默认值
-- 👥 **观众列表** — 实时查看每路流的在线观众及连接信息
-- 📊 **服务器监控** — CPU、内存、磁盘、网络实时图表
-- ⚙️ **服务配置** — 在线读写 ZLMediaKit 配置项
-- 🌐 **在线推流** — 基于 WHIP 协议的浏览器端直播推流
-- 🔗 **网络连接** — 查看和管理当前所有 TCP/UDP 会话
-- 📁 **录像管理** — 录像文件分流、分日期浏览，支持检索、在线播放与下载，自动按策略清理过期文件
-- 🧩 **插件系统** — 内置可扩展 Python 事件钩子，支持用户自定义推流鉴权、录制回调、流上下线通知等业务逻辑，无需修改核心代码
-- 🩺 **视频质量探针** — 对推拉流实时采样分析，输出码率、帧率、GOP、音视频交织性等多维度质量指标，以折线图与打点图直观呈现，快速定位卡顿、花屏等异常
+- 🎬 **Stream management** — view, play, and stop streams; capture snapshots
+- 📡 **Pull-stream proxy** — multiple backup sources, on-demand/immediate modes, automatic failover, persistent recovery, online editing
+- 🔄 **Transcode presets** — save multiple protocol-conversion parameter sets and load them with one click when pulling a stream; supports loading the server defaults
+- 👥 **Viewer list** — see online viewers and connection details for each stream in real time
+- 📊 **Server monitoring** — real-time charts for CPU, memory, disk, and network
+- ⚙️ **Service configuration** — read and write ZLMediaKit configuration items online
+- 🌐 **Browser publishing** — WHIP-based live publishing straight from the browser
+- 🔗 **Network connections** — view and manage all current TCP/UDP sessions
+- 📁 **Recording management** — recordings organized by stream and by date, with search, in-browser playback and download, and automatic policy-based cleanup of expired files
+- 🧩 **Plugin system** — built-in extensible Python event hooks; implement custom business logic such as publish authentication, recording callbacks, and stream on/offline notifications without modifying the core code
+- 🩺 **Video quality probe** — real-time sampling and analysis of published/pulled streams, reporting multi-dimensional quality metrics (bitrate, frame rate, GOP, audio/video interleaving, and more) as line and scatter charts to quickly pinpoint anomalies such as stuttering and artifacts
 
 ---
 
-## 快速开始（Docker 一键部署）
+## Quick start (one-command Docker deployment)
 
-已集成到 ZLMediaKit Docker 镜像中，无需手动配置：
+Already integrated into the ZLMediaKit Docker image — no manual configuration required:
 
 ```bash
 docker run -id \
@@ -45,46 +45,46 @@ docker run -id \
   zlmediakit/zlmediakit:master_py
 ```
 
-启动后浏览器访问 `http://<服务器IP>/`，输入 `api.secret` 密钥即可登录。
+Once it starts, open `http://<server-IP>/` in your browser and log in with your `api.secret` key.
 
-### 端口说明
+### Ports
 
-| 端口  | 协议    | 用途               |
-| ----- | ------- | ------------------ |
-| 80    | TCP     | HTTP（前端 + API） |
-| 443   | TCP     | HTTPS / WSS        |
-| 1935  | TCP     | RTMP               |
-| 554   | TCP     | RTSP               |
-| 10000 | TCP/UDP | RTP                |
-| 8000  | UDP     | WebRTC             |
-| 9000  | UDP     | SRT                |
+| Port  | Protocol | Purpose            |
+| ----- | -------- | ------------------ |
+| 80    | TCP      | HTTP (frontend + API) |
+| 443   | TCP      | HTTPS / WSS        |
+| 1935  | TCP      | RTMP               |
+| 554   | TCP      | RTSP               |
+| 10000 | TCP/UDP  | RTP                |
+| 8000  | UDP      | WebRTC             |
+| 9000  | UDP      | SRT                |
 
 ---
 
-## 手动部署（源码方式）
+## Manual deployment (from source)
 
-适用于自行编译 ZLMediaKit 并希望使用 PyMKUI 的场景。
+For cases where you compile ZLMediaKit yourself and want to use PyMKUI.
 
-### 项目结构
+### Project structure
 
 ```text
 pymkui/
-├─ frontend/          # 静态前端页面
-├─ backend/           # Python 插件与 FastAPI 接口
-│  ├─ mk_plugin.py    # ZLMediaKit Python 插件入口
+├─ frontend/          # Static frontend pages
+├─ backend/           # Python plugin and FastAPI interface
+│  ├─ mk_plugin.py    # ZLMediaKit Python plugin entry point
 │  ├─ py_http_api.py  # FastAPI HTTP API
-│  ├─ database.py     # SQLite 数据库
-│  ├─ config.py       # 路径配置
-│  ├─ mk_logger.py    # 日志封装
-│  └─ shared_loop.py  # asyncio 事件循环共享
-├─ data/              # 运行时自动生成
-│  └─ pymkui.db       # ⚠️ 升级时请删除
+│  ├─ database.py     # SQLite database
+│  ├─ config.py       # Path configuration
+│  ├─ mk_logger.py    # Logging wrapper
+│  └─ shared_loop.py  # Shared asyncio event loop
+├─ data/              # Generated automatically at runtime
+│  └─ pymkui.db       # ⚠️ Delete when upgrading
 └─ README.md
 ```
 
-### 步骤 1：安装 Python 依赖
+### Step 1: Install the Python dependencies
 
-> 需要 Python 3.10+
+> Requires Python 3.10+
 
 ```bash
 cd pymkui/backend
@@ -92,7 +92,7 @@ pip install -r requirements.txt
 ```
 
 <details>
-<summary>conda / venv 方式</summary>
+<summary>conda / venv</summary>
 
 ```bash
 # conda
@@ -108,16 +108,16 @@ python -m venv venv && venv\Scripts\activate && pip install -r requirements.txt
 
 </details>
 
-### 步骤 2：编译 ZLMediaKit 时开启 Python 支持
+### Step 2: Enable Python support when building ZLMediaKit
 
 ```bash
-# 安装 Python 相关依赖
+# Install the Python-related dependencies
 apt-get update && apt-get install -y python3 python3-dev python3-pip
-# cmake时指定开启python相关特性
+# Enable the Python features during cmake
 cmake .. -DENABLE_PYTHON=ON
 ```
 
-### 步骤 3：修改 `config.ini`
+### Step 3: Edit `config.ini`
 
 ```ini
 [python]
@@ -127,7 +127,7 @@ plugin=mk_plugin
 rootPath=/path/to/pymkui/frontend
 ```
 
-### 步骤 4：让 ZLMediaKit 找到 backend 模块
+### Step 4: Let ZLMediaKit find the backend module
 
 ```bash
 # Linux/Mac
@@ -137,66 +137,66 @@ export PYTHONPATH=/path/to/pymkui/backend:$PYTHONPATH
 set PYTHONPATH=C:\pymkui\backend;%PYTHONPATH%
 ```
 
-### 步骤 5：启动并验证
+### Step 5: Start and verify
 
 ```bash
-# 启动 ZLMediaKit
+# Start ZLMediaKit
 ./MediaServer
 
-# 验证前端可访问
+# Verify that the frontend is reachable
 curl -sv http://localhost:80/login.html
-# 应返回 HTTP/1.1 200 OK
+# Should return HTTP/1.1 200 OK
 ```
 
 ---
 
-## 界面展示
+## Screenshots
 
 |                                                       |                                                       |
 | ----------------------------------------------------- | ----------------------------------------------------- |
-| ![登录](image/wechat_2026-03-07_152523_627.png)         | ![服务器状态](image/wechat_2026-03-07_145716_786.png)   |
-| ![流管理](image/wechat_2026-03-07_145746_419.png)       | ![流信息](image/wechat_2026-03-07_152506_741.png)       |
-| ![流播放](image/wechat_2026-03-07_145756_844.png)       | ![观众列表](image/wechat_2026-03-07_145834_262.png)     |
-| ![系统设置](image/wechat_2026-03-07_150120_303.png)     | ![网络连接](image/wechat_2026-03-07_145637_562.png)     |
-| ![在线推流](image/wechat_2026-03-07_150213_341.png)     | ![拉流代理](image/wechat_2026-03-18_203037_193.png)     |
-| ![拉流代理详情](image/wechat_2026-03-18_203057_257.png) | ![添加拉流代理](image/wechat_2026-03-18_203133_402.png) |
-| ![录像管理](image/wechat_2026-05-04_105426_633.png)     | ![播放全天录像](image/wechat_2026-05-04_105440_247.png) |
-| ![插件系统](image/wechat_2026-05-04_105512_197.png)     | ![插件配置](image/wechat_2026-05-04_105540_479.png)    |
-| ![流信息](image/wechat_2026-05-04_105614_128.png)    | ![探针详情](image/wechat_2026-05-04_105632_441.png)        |
+| ![Login](image/wechat_2026-03-07_152523_627.png)         | ![Server status](image/wechat_2026-03-07_145716_786.png)   |
+| ![Stream management](image/wechat_2026-03-07_145746_419.png)       | ![Stream info](image/wechat_2026-03-07_152506_741.png)       |
+| ![Stream playback](image/wechat_2026-03-07_145756_844.png)       | ![Viewer list](image/wechat_2026-03-07_145834_262.png)     |
+| ![System settings](image/wechat_2026-03-07_150120_303.png)     | ![Network connections](image/wechat_2026-03-07_145637_562.png)     |
+| ![Browser publishing](image/wechat_2026-03-07_150213_341.png)     | ![Pull-stream proxy](image/wechat_2026-03-18_203037_193.png)     |
+| ![Pull-stream proxy details](image/wechat_2026-03-18_203057_257.png) | ![Add pull-stream proxy](image/wechat_2026-03-18_203133_402.png) |
+| ![Recording management](image/wechat_2026-05-04_105426_633.png)     | ![Full-day recording playback](image/wechat_2026-05-04_105440_247.png) |
+| ![Plugin system](image/wechat_2026-05-04_105512_197.png)     | ![Plugin configuration](image/wechat_2026-05-04_105540_479.png)    |
+| ![Stream info](image/wechat_2026-05-04_105614_128.png)    | ![Probe details](image/wechat_2026-05-04_105632_441.png)        |
 
 ---
 
-## 常见问题
+## FAQ
 
-| 问题                          | 解决方法                                              |
-| ----------------------------- | ----------------------------------------------------- |
-| zlm打印Python调用红色错误日志 | 同时更新zlm和pymkui至最新版本                         |
-| `/index/pyapi/*` 返回未登录 | 正常现象，API 已通，完成登录即可                      |
-| 配了 rootPath 仍 404          | 确认路径指向 `frontend/` 目录且 `login.html` 存在 |
-| 启动报数据库错误              | 删除 `data/pymkui.db` 后重启                        |
-
----
-
-## 技术栈
-
-| 层级   | 技术                                              |
-| ------ | ------------------------------------------------- |
-| 前端   | HTML5 + Tailwind CSS + Font Awesome               |
-| 播放器 | Jessibuca (FLV)、原生 HLS、WHEP (WebRTC)          |
-| 后端   | Python + FastAPI（内嵌于 ZLMediaKit Python 插件） |
-| 数据库 | SQLite                                            |
-| 服务器 | ZLMediaKit (C++)                                  |
+| Issue                                          | Solution                                                        |
+| ---------------------------------------------- | --------------------------------------------------------------- |
+| ZLM prints red Python error logs               | Update both ZLM and PyMKUI to the latest versions               |
+| `/index/pyapi/*` returns "not logged in"       | Expected — the API is reachable; just complete the login        |
+| Still getting 404 after setting `rootPath`     | Make sure the path points to the `frontend/` directory and that `login.html` exists |
+| Database error on startup                      | Delete `data/pymkui.db` and restart                             |
 
 ---
 
-## 未来规划
+## Tech stack
 
-- 🤖 **AI 推理集成** — 对接 ONNX / TensorRT / OpenCV DNN，实现实时视频分析（目标检测、人脸识别等）
+| Layer    | Technology                                        |
+| -------- | ------------------------------------------------- |
+| Frontend | HTML5 + Tailwind CSS + Font Awesome               |
+| Player   | Jessibuca (FLV), native HLS, WHEP (WebRTC)        |
+| Backend  | Python + FastAPI (embedded in the ZLMediaKit Python plugin) |
+| Database | SQLite                                            |
+| Server   | ZLMediaKit (C++)                                  |
 
-## 贡献
+---
 
-欢迎提交 Issue 和 Pull Request。
+## Roadmap
 
-## 许可证
+- 🤖 **AI inference integration** — integrate ONNX / TensorRT / OpenCV DNN for real-time video analysis (object detection, face recognition, and so on)
+
+## Contributing
+
+Issues and pull requests are welcome.
+
+## License
 
 MIT License
