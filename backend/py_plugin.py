@@ -8,7 +8,7 @@ import threading
 
 import mk_logger
 
-# ── 所有 ZLM 支持的事件类型 ──────────────────────────────────────────
+# ── All ZLM-supported event types ──────────────────────────────────────────
 SUPPORTED_EVENTS = [
     "on_start",
     "on_publish",
@@ -32,25 +32,25 @@ class PluginBase:
     name = "base"
     version = "0.0.1"
     description = "Base plugin class"
-    # type 必须是 SUPPORTED_EVENTS 中的一个
+    # type must be one of SUPPORTED_EVENTS
     type = "base"
-    # interruptible=True  → 拦截型：run() 返回 True 后立即停止后续插件派发
-    #                        适用于鉴权等需要独占事件控制权的场景（如 TokenAuth 会调用 invoker）
-    # interruptible=False → 监听型：无论 run() 返回什么，都继续执行后续插件
-    #                        适用于日志记录、写库等不影响业务流程的旁路处理
+    # interruptible=True  → intercepting type: after run() returns True, immediately stop dispatching to subsequent plugins
+    #                        for scenarios requiring exclusive event control, such as authentication (e.g. TokenAuth calls invoker)
+    # interruptible=False → listening type: regardless of what run() returns, continue executing subsequent plugins
+    #                        for side-channel handling that doesn't affect the business flow, such as logging and DB writes
     interruptible = True
-    # abstract=True 表示该类是中间抽象基类，不会被注册为实际插件。
-    # 插件加载器会跳过所有 abstract=True 的类，只注册 abstract=False 的具体插件。
+    # abstract=True means this class is an intermediate abstract base and won't be registered as an actual plugin.
+    # The plugin loader skips all abstract=True classes and registers only concrete abstract=False plugins.
     abstract = False
-    # multi_binding=True 表示该插件允许被同一事件多次绑定（例如支持流过滤的鉴权插件）。
-    # 默认 False，即每个事件只能绑定同一插件一次。
+    # multi_binding=True means this plugin may be bound to the same event multiple times (e.g. an auth plugin that supports stream filtering).
+    # Default False, i.e. each event can bind the same plugin only once.
     multi_binding = False
 
     def get_url_params(self, **kwargs) -> dict:
         """
-        可选方法，在播放 URL 生成前调用，返回需要附加到播放 URL 的查询参数 dict。
-        例如鉴权插件返回 {"token": "xxx"}，前端将其拼接到播放 URL 中。
-        默认返回空 dict，子类按需覆盖。
+        Optional method, called before the playback URL is generated; returns a dict of query params to append to the playback URL.
+        For example, an auth plugin returns {"token": "xxx"}, and the frontend appends it to the playback URL.
+        Returns an empty dict by default; subclasses override as needed.
         """
         return {}
 
@@ -59,13 +59,13 @@ class PluginBase:
     
     def params(self) -> dict:
         """
-        可选方法，返回一个 dict 定义插件绑定参数的 schema 结构。
-        例如：
+        Optional method; returns a dict defining the schema structure of the plugin binding params.
+        For example:
         {
             "push_url": {
                 "type": "string",
                 "default": "https://default.example.com",
-                "description": "推流地址"
+                "description": "push URL"
             },
             ...
         }
@@ -74,52 +74,52 @@ class PluginBase:
 
 class PluginRegistry:
     """
-    全局插件注册中心，负责：
-    - 扫描并加载 plugins/ 目录下的插件（支持热加载）
-    - 维护 事件类型 → [{"name": ..., "params": {...}}, ...] 的绑定关系
-    - 线程安全地分发事件到已绑定的插件
+    Global plugin registry, responsible for:
+    - Scan and load plugins under the plugins/ directory (supports hot-reload)
+    - Maintain the event_type → [{"name": ..., "params": {...}}, ...] binding relationship
+    - Thread-safely dispatch events to the bound plugins
     """
     _lock = threading.RLock()
 
     def __init__(self):
-        # name → PluginBase 实例
+        # name → PluginBase instance
         self._plugins: dict[str, PluginBase] = {}
-        # event_type → list[{"name": str, "params": dict}]（已启用的绑定，有序）
+        # event_type → list[{"name": str, "params": dict}](enabled bindings, ordered)
         self._bindings: dict[str, list[dict]] = {}
 
-    # ── 加载 / 热加载 ─────────────────────────────────────────────
+    # ── Load / hot-reload ─────────────────────────────────────────────
 
     def load(self, plugin_dir: str = "plugins") -> dict:
         """
-        扫描 plugin_dir 目录，加载（或重新加载）所有插件模块。
-        热加载前先清空已注册的插件，避免残留已删除或改名的插件。
-        返回本次加载到的 {name: instance} 字典。
+        Scan the plugin_dir directory and load (or reload) all plugin modules.
+        Clear already-registered plugins before hot-reloading to avoid leftover deleted or renamed plugins.
+        Returns the {name: instance} dict loaded this time.
         """
         current_dir = os.path.dirname(os.path.abspath(__file__))
         plugin_path = os.path.join(current_dir, plugin_dir)
         loaded = {}
 
         if not os.path.isdir(plugin_path):
-            mk_logger.log_warn(f"[PluginRegistry] 插件目录不存在: {plugin_path}")
+            mk_logger.log_warn(f"[PluginRegistry] Plugin directory does not exist: {plugin_path}")
             return loaded
 
-        # 热加载前清空插件注册表
+        # Clear the plugin registry before hot-reloading
         with self._lock:
             self._plugins.clear()
-            mk_logger.log_info("[PluginRegistry] 已清空插件注册表，开始重新加载...")
+            mk_logger.log_info("[PluginRegistry] Plugin registry cleared, starting reload...")
 
         for filename in sorted(os.listdir(plugin_path)):
             if not filename.endswith(".py") or filename.startswith("_"):
                 continue
             module_name = f"{plugin_dir}.{filename[:-3]}"
             try:
-                # 已加载过则 reload，否则 import
+                # if already loaded then reload, otherwise import
                 if module_name in sys.modules:
                     module = importlib.reload(sys.modules[module_name])
-                    mk_logger.log_info(f"[PluginRegistry] 热重载模块: {module_name}")
+                    mk_logger.log_info(f"[PluginRegistry] Hot-reloading module: {module_name}")
                 else:
                     module = importlib.import_module(module_name)
-                    mk_logger.log_info(f"[PluginRegistry] 加载模块: {module_name}")
+                    mk_logger.log_info(f"[PluginRegistry] Loading module: {module_name}")
 
                 for cls_name, obj in inspect.getmembers(module, inspect.isclass):
                     if issubclass(obj, PluginBase) and obj is not PluginBase and not obj.abstract:
@@ -128,18 +128,18 @@ class PluginRegistry:
                             self._plugins[instance.name] = instance
                         loaded[instance.name] = instance
                         mk_logger.log_info(
-                            f"[PluginRegistry] 注册插件: {instance.name} "
+                            f"[PluginRegistry] Registered plugin: {instance.name} "
                             f"v{instance.version} type={instance.type}"
                         )
             except Exception as e:
-                mk_logger.log_warn(f"[PluginRegistry] 加载 {module_name} 失败: {e}")
+                mk_logger.log_warn(f"[PluginRegistry] Failed to load {module_name}: {e}")
 
         return loaded
 
-    # ── 查询 ──────────────────────────────────────────────────────
+    # ── Query ──────────────────────────────────────────────────────
 
     def get_all(self) -> list[dict]:
-        """返回所有已加载插件的信息列表（含参数 schema）"""
+        """Return the info list of all loaded plugins (including param schema)"""
         with self._lock:
             result = []
             for p in self._plugins.values():
@@ -162,39 +162,39 @@ class PluginRegistry:
         with self._lock:
             return self._plugins.get(name)
 
-    # ── 绑定管理 ──────────────────────────────────────────────────
+    # ── Binding management ──────────────────────────────────────────────────
 
     def set_bindings(self, event_type: str, bindings: list):
         """
-        设置某个事件类型已启用的绑定列表（全量替换）。
+        Set the enabled binding list for an event type (full replacement).
 
-        bindings 格式（两种均支持）：
-          - 旧格式：["plugin_name1", "plugin_name2"]
-          - 新格式：[{"name": "plugin_name1", "params": {...}}, ...]
+        bindings format (both supported):
+          - old format: ["plugin_name1", "plugin_name2"]
+          - new format: [{"name": "plugin_name1", "params": {...}}, ...]
 
-        无效插件名（不存在或类型不匹配）会被跳过并记录警告。
+        Invalid plugin names (nonexistent or type-mismatched) are skipped and a warning is logged.
         """
         with self._lock:
             valid = []
             for item in bindings:
-                # 兼容旧格式 str
+                # Compatible with old str format
                 if isinstance(item, str):
                     item = {"name": item, "params": {}}
                 n = item.get("name", "")
                 params = item.get("params") or {}
                 if n not in self._plugins:
-                    mk_logger.log_warn(f"[PluginRegistry] 绑定时插件不存在: {n}")
+                    mk_logger.log_warn(f"[PluginRegistry] Plugin does not exist when binding: {n}")
                     continue
                 p = self._plugins[n]
                 if p.type != event_type:
                     mk_logger.log_warn(
-                        f"[PluginRegistry] 插件类型不匹配: {n}.type={p.type} != {event_type}"
+                        f"[PluginRegistry] Plugin type mismatch: {n}.type={p.type} != {event_type}"
                     )
                     continue
                 valid.append({"name": n, "params": params, "id": item.get("id")})
             self._bindings[event_type] = valid
             mk_logger.log_info(
-                f"[PluginRegistry] 绑定更新: {event_type} → "
+                f"[PluginRegistry] Binding updated: {event_type} → "
                 f"{[v['name'] for v in valid]}"
             )
 
@@ -202,15 +202,15 @@ class PluginRegistry:
         with self._lock:
             return dict(self._bindings)
 
-    # ── 事件分发 ──────────────────────────────────────────────────
+    # ── Event dispatch ──────────────────────────────────────────────────
 
     def collect_url_params(self, event_type: str, **kwargs) -> dict:
         """
-        收集绑定到 event_type 的所有插件的播放 URL 附加参数。
+        Collect the playback URL extra params of all plugins bound to event_type.
 
-        遍历该事件下所有已启用的插件，依次调用 get_url_params()，
-        将返回的 dict 合并后返回（后面的插件可覆盖前面的同名 key）。
-        插件不实现 get_url_params 或返回空时跳过。
+        Iterate over all enabled plugins under this event and call get_url_params() in turn,
+        Merge the returned dict and return it (later plugins may override an earlier same-name key).
+        Skip plugins that don't implement get_url_params or return empty.
         """
         with self._lock:
             items = list(self._bindings.get(event_type, []))
@@ -229,22 +229,22 @@ class PluginRegistry:
                     merged.update(extra)
             except Exception as e:
                 mk_logger.log_warn(
-                    f"[PluginRegistry] 插件 [{name}] collect_url_params 异常: {e}"
+                    f"[PluginRegistry] Plugin [{name}] collect_url_params exception: {e}"
                 )
         return merged
 
     def dispatch(self, event_type: str, **kwargs) -> bool:
         """
-        将事件分发给所有绑定到 event_type 且已启用的插件，按列表顺序（优先级从高到低）执行。
+        Dispatch the event to all enabled plugins bound to event_type, executed in list order (priority high to low).
 
-        拦截型插件（interruptible=True）：
-          run() 返回 True → 立即停止后续所有插件并返回 True（接管事件）
-          run() 返回 False → 继续执行下一个插件
+        Intercepting plugins (interruptible=True):
+          run() returns True → immediately stop all subsequent plugins and return True (take over the event)
+          run() returns False → continue to the next plugin
 
-        监听型插件（interruptible=False）：
-          无论 run() 返回什么 → 始终继续执行后续插件，本插件不影响最终接管结果
+        Listening plugins (interruptible=False):
+          regardless of what run() returns → always continue executing subsequent plugins; this plugin doesn't affect the final takeover result
 
-        全部插件执行完后若没有任何拦截型插件接管 → 返回 False
+        after all plugins have executed, if no intercepting plugin took over → return False
         """
         with self._lock:
             items = list(self._bindings.get(event_type, []))
@@ -260,7 +260,7 @@ class PluginRegistry:
                 continue
             try:
                 result = plugin.run(**kwargs, binding_params=params)
-                # 更新命中次数
+                # Update hit count
                 if binding_id is not None:
                     try:
                         from py_http_api import db as _db
@@ -270,26 +270,26 @@ class PluginRegistry:
                 if plugin.interruptible:
                     if result:
                         mk_logger.log_info(
-                            f"[PluginRegistry] 事件 {event_type} 被拦截型插件 [{name}] 接管"
+                            f"[PluginRegistry] Event {event_type} taken over by intercepting plugin [{name}]"
                         )
                         intercepted = True
-                        break   # 拦截接管，终止后续
+                        break   # intercepted and took over, terminate the rest
                 else:
                     mk_logger.log_info(
-                        f"[PluginRegistry] 监听插件 [{name}] 处理 {event_type} 完成"
+                        f"[PluginRegistry] Listening plugin [{name}] finished handling {event_type}"
                     )
             except Exception as e:
                 mk_logger.log_warn(
-                    f"[PluginRegistry] 插件 [{name}] 处理 {event_type} 异常: {e}"
+                    f"[PluginRegistry] Plugin [{name}] handling {event_type} exception: {e}"
                 )
         return intercepted
 
 
-# ── 全局单例 ─────────────────────────────────────────────────────
+# ── Global singleton ─────────────────────────────────────────────────────
 registry = PluginRegistry()
 
 
-# ── 兼容旧接口 ───────────────────────────────────────────────────
+# ── Legacy-interface compatibility ───────────────────────────────────────────────────
 def load_plugins(plugin_dir: str = "plugins") -> dict:
-    """兼容旧调用方式，委托给全局 registry"""
+    """Compatible with the legacy call style, delegates to the global registry"""
     return registry.load(plugin_dir)
