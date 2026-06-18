@@ -21,13 +21,13 @@ class Database:
         self.connection = sqlite3.connect(self.db_path, check_same_thread=False)
         self.connection.row_factory = sqlite3.Row
         self.cursor = self.connection.cursor()
-        # SQLite 默认不开启外键约束，每次连接后需手动启用
+        # SQLite does not enable foreign key constraints by default; must enable them manually after each connection
         self.cursor.execute("PRAGMA foreign_keys = ON")
 
         self._create_tables()
     
     def _get_local_timezone(self):
-        """获取本地时区"""
+        """Get the local timezone"""
         import datetime
         try:
             return datetime.datetime.now().astimezone().tzinfo
@@ -35,26 +35,26 @@ class Database:
             return None
     
     def _date_to_timestamp_range(self, date_str):
-        """将日期字符串转换为当天的时间戳范围"""
+        """Convert a date string to the timestamp range of that day"""
         import datetime
         import time
         try:
             date_obj = datetime.datetime.strptime(date_str, "%Y-%m-%d")
-            # 尝试使用本地时区
+            # Try to use the local timezone
             local_tz = self._get_local_timezone()
             if local_tz:
                 local_date = date_obj.replace(tzinfo=local_tz)
                 start_of_day = int(local_date.timestamp())
             else:
-                # 如果无法获取本地时区，使用默认方式
+                # If the local timezone can't be obtained, use the default method
                 start_of_day = int(time.mktime(date_obj.timetuple()))
-            end_of_day = start_of_day + 86399  # 当天23:59:59
+            end_of_day = start_of_day + 86399  # 23:59:59 of that day
             return start_of_day, end_of_day
         except ValueError:
             return None, None
     
     def _month_to_timestamp_range(self, year, month):
-        """将年月转换为该月的时间戳范围"""
+        """Convert a year-month to the timestamp range of that month"""
         import datetime
         import time
         try:
@@ -64,15 +64,15 @@ class Database:
             else:
                 end_date = datetime.datetime(year, month + 1, 1)
             
-            # 尝试使用本地时区
+            # Try to use the local timezone
             local_tz = self._get_local_timezone()
             if local_tz:
                 start_date_local = start_date.replace(tzinfo=local_tz)
                 end_date_local = end_date.replace(tzinfo=local_tz)
                 start_ts = int(start_date_local.timestamp())
-                end_ts = int(end_date_local.timestamp()) - 1  # 当月最后一秒
+                end_ts = int(end_date_local.timestamp()) - 1  # last second of the month
             else:
-                # 如果无法获取本地时区，使用默认方式
+                # If the local timezone can't be obtained, use the default method
                 start_ts = int(time.mktime(start_date.timetuple()))
                 end_ts = int(time.mktime(end_date.timetuple())) - 1
             return start_ts, end_ts
@@ -80,7 +80,7 @@ class Database:
             return None, None
 
     def _cursor(self) -> sqlite3.Cursor:
-        """每次调用返回一个新的独立游标，避免递归使用同一游标导致报错"""
+        """Return a new independent cursor on each call to avoid errors from recursively reusing the same cursor"""
         cur = self.connection.cursor()
         cur.execute("PRAGMA foreign_keys = ON")
         return cur
@@ -103,8 +103,8 @@ class Database:
             )
         ''')
 
-        # 多地址表：每条代理可配置多个拉流地址，priority 越小越优先
-        # params 字段（JSON）存储该地址专属参数，如 schema、rtp_type 等
+        # Multi-address table: each proxy can have multiple pull URLs; smaller priority means higher precedence
+        # params field (JSON) stores params specific to this address, e.g. schema, rtp_type, etc.
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS pull_proxy_urls (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -178,8 +178,8 @@ class Database:
             )
         ''')
 
-        # 插件事件绑定表：每条记录 = 一个事件类型 + 一个插件的绑定，含参数和优先级
-        # priority 越小越先执行；params 为 JSON 对象，存储该绑定的自定义参数
+        # Plugin event binding table: each record = one event type + one plugin binding, with params and priority
+        # priority the smaller it is, the earlier it executes; params is a JSON object storing this binding's custom params
         self.cursor.execute('''
             CREATE TABLE IF NOT EXISTS plugin_bindings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -195,7 +195,7 @@ class Database:
 
         self.connection.commit()
 
-        # 仅在 plugin_bindings 表为空时（首次建库）插入默认绑定
+        # Insert default bindings only when the plugin_bindings table is empty (first DB creation)
         self.cursor.execute("SELECT COUNT(*) FROM plugin_bindings")
         if self.cursor.fetchone()[0] == 0:
             self._init_default_plugin_bindings()
@@ -203,7 +203,7 @@ class Database:
         mk_logger.log_info(f"Database initialized at {self.db_path}")
 
     def _init_default_plugin_bindings(self):
-        """插入内置插件的默认绑定记录（仅首次建库、表为空时调用）"""
+        """Insert default binding records for built-in plugins (called only on first DB creation when the table is empty)"""
         defaults = [
             ("on_stream_not_found",    "pull_proxy_on_demand",  "{}", 0, 1),
             ("on_player_proxy_failed", "pull_proxy_failover",   "{}", 0, 1),
@@ -222,7 +222,7 @@ class Database:
                 (event_type, plugin_name, params, priority, enabled),
             )
         self.connection.commit()
-        mk_logger.log_info("[Database] 默认插件绑定已初始化")
+        mk_logger.log_info("[Database] Default plugin bindings initialized")
     
     def close(self):
         """Close database connection"""
@@ -326,7 +326,7 @@ class Database:
             return False
     
     def add_recording(self, info: dict) -> Optional[int]:
-        """写入一条 on_record_mp4 录像记录，file_path 相同则忽略"""
+        """Write an on_record_mp4 recording record; ignore if file_path is the same"""
         try:
             cur = self._cursor()
             cur.execute(
@@ -354,7 +354,7 @@ class Database:
     def get_recordings(self, app: str = "", stream: str = "", vhost: str = "",
                        date: str = "", limit: int = 500, offset: int = 0,
                        start_ts: int = 0, end_ts: int = 0) -> List[Dict[str, Any]]:
-        """查询录像列表，支持按 app/stream/vhost/日期/时间戳范围过滤"""
+        """Query the recordings list; supports filtering by app/stream/vhost/date/timestamp-range"""
         try:
             clauses, params = [], []
             if vhost:
@@ -364,7 +364,7 @@ class Database:
             if stream:
                 clauses.append("stream = ?"); params.append(stream)
             if date:
-                # 使用抽象的方法将日期转换为时间戳范围
+                # Use the abstracted method to convert the date to a timestamp range
                 start_of_day, end_of_day = self._date_to_timestamp_range(date)
                 if start_of_day and end_of_day:
                     clauses.append("start_time >= ?"); params.append(start_of_day)
@@ -386,7 +386,7 @@ class Database:
             return []
 
     def get_recording_streams(self) -> List[Dict[str, Any]]:
-        """返回所有有录像的 vhost/app/stream 组合（去重）"""
+        """Return all vhost/app/stream combinations that have recordings (deduplicated)"""
         try:
             cur = self._cursor()
             cur.execute(
@@ -398,28 +398,28 @@ class Database:
             return []
 
     def _remove_file_and_empty_parents(self, file_path: Optional[str]):
-        """删除文件，然后逐级向上删除空目录"""
+        """Delete the file, then remove empty directories level by level upward"""
         if not file_path or not os.path.isfile(file_path):
             return
         try:
             os.remove(file_path)
         except Exception as e:
-            mk_logger.log_warn(f"[Database] 删除文件失败 {file_path}: {e}")
+            mk_logger.log_warn(f"[Database] Failed to delete file {file_path}: {e}")
             return
-        # 逐级向上清理空目录
+        # Clean up empty directories level by level upward
         parent = os.path.dirname(file_path)
         while parent and os.path.isdir(parent):
             try:
-                if os.listdir(parent):  # 非空，停止
+                if os.listdir(parent):  # not empty, stop
                     break
                 os.rmdir(parent)
-                mk_logger.log_info(f"[Database] 删除空目录 {parent}")
+                mk_logger.log_info(f"[Database] Removed empty directory {parent}")
                 parent = os.path.dirname(parent)
             except Exception:
                 break
 
     def delete_recording(self, recording_id: int) -> bool:
-        """删除一条录像记录，同时删除文件及空父目录"""
+        """Delete a recording record, and also delete the file and empty parent directories"""
         try:
             cur = self._cursor()
             cur.execute("SELECT file_path FROM recordings WHERE id = ?", (recording_id,))
@@ -434,7 +434,7 @@ class Database:
             return False
 
     def get_recording(self, app: str, stream: str, file_path: str) -> Optional[Dict[str, Any]]:
-        """按 file_path 查询单条录像"""
+        """Query a single recording by file_path"""
         try:
             cur = self._cursor()
             cur.execute(
@@ -448,7 +448,7 @@ class Database:
             return None
 
     def get_recording_by_id(self, rec_id: int) -> Optional[Dict[str, Any]]:
-        """按主键 id 查询单条录像"""
+        """Query a single recording by primary key id"""
         try:
             cur = self._cursor()
             cur.execute("SELECT * FROM recordings WHERE id = ?", (rec_id,))
@@ -459,7 +459,7 @@ class Database:
             return None
 
     def delete_recordings_by_stream(self, vhost: str, app: str, stream: str) -> int:
-        """删除指定流的全部录像记录，返回删除条数"""
+        """Delete all recording records of a given stream; return the number deleted"""
         try:
             cur = self._cursor()
             cur.execute(
@@ -480,12 +480,12 @@ class Database:
             return 0
 
     def delete_recordings_by_stream_date(self, vhost: str, app: str, stream: str, date: str) -> int:
-        """删除指定流某天的全部录像记录（date: YYYY-MM-DD），返回删除条数"""
+        """Delete all recording records of a given stream on a given day (date: YYYY-MM-DD); return the number deleted"""
         try:
-            # 使用抽象的方法将日期转换为时间戳范围
+            # Use the abstracted method to convert the date to a timestamp range
             start_of_day, end_of_day = self._date_to_timestamp_range(date)
             if not start_of_day or not end_of_day:
-                return 0  # 日期格式错误，返回0
+                return 0  # invalid date format, return 0
             
             cur = self._cursor()
             cur.execute(
@@ -507,13 +507,13 @@ class Database:
 
     def get_recording_dates(self, year: int, month: int,
                             app: str = "", stream: str = "", vhost: str = "") -> list:
-        """返回指定年月内有录像的日期列表（YYYY-MM-DD 字符串列表）"""
+        """Return the list of dates that have recordings in the given year-month (YYYY-MM-DD string list)"""
         try:
             import datetime
-            # 使用抽象的方法将年月转换为时间戳范围
+            # Use the abstracted method to convert the year-month to a timestamp range
             start_ts, end_ts = self._month_to_timestamp_range(year, month)
             if not start_ts or not end_ts:
-                return []  # 如果转换失败，返回空列表
+                return []  # if conversion fails, return an empty list
             
             clauses = ["start_time >= ?", "start_time <= ?"]
             params: list = [start_ts, end_ts]
@@ -526,26 +526,26 @@ class Database:
             where = "WHERE " + " AND ".join(clauses)
             
             cur = self._cursor()
-            # 查询该月内的所有录像记录
+            # Query all recording records within that month
             cur.execute(
                 f"SELECT start_time FROM recordings {where}",
                 params,
             )
             
-            # 转换时间戳为日期字符串并去重
+            # Convert timestamps to date strings and deduplicate
             dates = set()
             for row in cur.fetchall():
                 try:
                     ts = row["start_time"]
                     if ts:
-                        # 转换为本地时区的日期
+                        # Convert to the date in the local timezone
                         date_obj = datetime.datetime.fromtimestamp(ts)
                         date_str = date_obj.strftime("%Y-%m-%d")
                         dates.add(date_str)
                 except Exception:
                     pass
             
-            # 排序并返回
+            # Sort and return
             return sorted(list(dates))
         except Exception as e:
             mk_logger.log_warn(f"get_recording_dates error: {e}")
@@ -728,10 +728,10 @@ class Database:
             print(f"Failed to delete pull proxy: {e}")
             return False
 
-    # ==================== 多地址管理 ====================
+    # ==================== Multi-address management ====================
 
     def get_proxy_urls(self, proxy_id: int) -> List[Dict[str, Any]]:
-        """获取某个代理的所有地址，按 priority 升序，params 字段自动反序列化为 dict"""
+        """Get all addresses of a proxy, ordered by priority ascending; the params field is automatically deserialized to dict"""
         try:
             cur = self._cursor()
             cur.execute(
@@ -755,8 +755,8 @@ class Database:
 
     def set_proxy_urls(self, proxy_id: int, urls: List[Dict[str, Any]]) -> bool:
         """
-        全量替换某个代理的地址列表。
-        urls 格式: [{"url": "...", "params": {"schema": "hls", "rtp_type": "0", ...}}, ...]
+        Fully replace the address list of a proxy.
+        urls format: [{"url": "...", "params": {"schema": "hls", "rtp_type": "0", ...}}, ...]
         """
         try:
             cur = self._cursor()
@@ -777,27 +777,27 @@ class Database:
             return False
 
     def get_pull_proxy_with_urls(self, proxy_id: int) -> Optional[Dict[str, Any]]:
-        """获取代理详情，同时附带 urls 列表"""
+        """Get proxy detail, including the urls list"""
         proxy = self.get_pull_proxy(proxy_id)
         if proxy:
             proxy['urls'] = self.get_proxy_urls(proxy_id)
         return proxy
 
     def get_all_pull_proxies_with_urls(self) -> List[Dict[str, Any]]:
-        """获取所有代理，每条附带 urls 列表"""
+        """Get all proxies, each including its urls list"""
         proxies = self.get_all_pull_proxies()
         for proxy in proxies:
             proxy['urls'] = self.get_proxy_urls(proxy['id'])
         return proxies
 
     # ══════════════════════════════════════════════════════════════
-    # 插件事件绑定 CRUD
+    # Plugin event binding CRUD
     # ══════════════════════════════════════════════════════════════
 
     def get_all_plugin_bindings(self) -> List[Dict[str, Any]]:
         """
-        获取所有事件绑定记录（新表 plugin_bindings）。
-        返回格式：
+        Get all event binding records (new table plugin_bindings).
+        Return format:
         [
           {
             "event_type": "on_publish",
@@ -808,7 +808,7 @@ class Database:
           },
           ...
         ]
-        按 event_type 分组，每组内按 priority ASC 排序。
+        Grouped by event_type, sorted within each group by priority ASC.
         """
         try:
             cur = self._cursor()
@@ -835,8 +835,8 @@ class Database:
 
     def get_plugin_bindings_for_event(self, event_type: str) -> List[Dict[str, Any]]:
         """
-        获取某个事件类型的所有绑定（新表），按 priority ASC 排序。
-        返回 [{"id":..., "plugin_name":..., "params":{...}, "priority":..., "enabled":...}, ...]
+        Get all bindings of an event type (new table), sorted by priority ASC.
+        Return [{"id":..., "plugin_name":..., "params":{...}, "priority":..., "enabled":...}, ...]
         """
         try:
             cur = self._cursor()
@@ -862,9 +862,9 @@ class Database:
         params: Optional[dict] = None, priority: int = 0, enabled: int = 1
     ) -> bool:
         """
-        插入单条绑定。
-        注意：移除了 UNIQUE 约束后不再做 ON CONFLICT UPSERT，直接 INSERT。
-        params 为字典，存储该绑定的自定义参数。
+        Insert a single binding.
+        Note: after removing the UNIQUE constraint, it no longer does ON CONFLICT UPSERT and INSERTs directly.
+        params is a dict storing this binding's custom params.
         """
         try:
             params_json = json.dumps(params or {}, ensure_ascii=False)
@@ -884,7 +884,7 @@ class Database:
             return False
 
     def delete_plugin_binding_item(self, event_type: str, plugin_name: str, row_id: Optional[int] = None) -> bool:
-        """删除单条事件-插件绑定。若提供 row_id 则按 id 精确删除，否则删除该事件下所有同名绑定"""
+        """Delete a single event-plugin binding. If row_id is provided, delete exactly by id; otherwise delete all same-name bindings under that event"""
         try:
             cur = self._cursor()
             if row_id is not None:
@@ -903,7 +903,7 @@ class Database:
             return False
 
     def delete_plugin_bindings_for_event(self, event_type: str) -> bool:
-        """删除某个事件类型下的所有绑定"""
+        """Delete all bindings under a given event type"""
         try:
             cur = self._cursor()
             cur.execute(
@@ -922,10 +922,10 @@ class Database:
         enabled: int = 1
     ) -> bool:
         """
-        全量保存某个事件类型的绑定列表（先删后插）。
-        bindings 格式：[{"plugin_name": ..., "params": {...}}, ...]
-        列表顺序即为执行优先级（index=priority）。
-        enabled 控制整组绑定的启用状态。
+        Fully save the binding list for an event type (delete then insert).
+        bindings format: [{"plugin_name": ..., "params": {...}}, ...]
+        The list order is the execution priority (index=priority).
+        enabled controls the enabled state of the whole binding group.
         """
         try:
             cur = self._cursor()
@@ -951,7 +951,7 @@ class Database:
             return False
 
     def increment_hit_count(self, binding_id: int) -> bool:
-        """将指定绑定记录的 hit_count 加 1"""
+        """Increment the hit_count of the given binding record by 1"""
         try:
             cur = self._cursor()
             cur.execute(
