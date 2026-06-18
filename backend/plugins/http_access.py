@@ -1,7 +1,7 @@
 """
-HTTP 访问控制内置插件
-- http_access_frontend: 处理 on_http_access，限制只允许访问 frontend 目录。
-默认启用，不建议禁用（禁用后 ZLM 将使用自身默认路径策略）。
+HTTP access-control built-in plugin
+- http_access_frontend: handles on_http_access, restricting access to the frontend directory only.
+Enabled by default; disabling is not recommended (after disabling, ZLM uses its own default path strategy).
 """
 
 import os
@@ -12,13 +12,13 @@ from py_plugin import PluginBase
 
 class HttpAccessFrontend(PluginBase):
     """
-    HTTP 访问控制插件（on_http_access）
-    只允许访问 frontend 目录下的文件，拒绝越界访问。
-    独占型：处理后直接返回，不再继续其他插件。
+    HTTP access-control plugin (on_http_access)
+    Only allows access to files under the frontend directory; rejects out-of-bounds access.
+    Exclusive type: returns directly after handling, no longer continuing to other plugins.
     """
     name = "http_access_frontend"
     version = "1.0.0"
-    description = "HTTP 访问控制，限制只允许访问 frontend 目录。默认启用，不建议禁用。"
+    description = "HTTP access control, restricting access to the frontend directory only. Enabled by default; disabling is not recommended."
     type = "on_http_access"
     interruptible = True
 

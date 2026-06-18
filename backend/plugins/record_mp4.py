@@ -1,6 +1,6 @@
 """
-MP4 录像入库插件（on_record_mp4）
-非独占，录像完成后将文件信息写入 recordings 表。
+MP4 recording-to-DB plugin (on_record_mp4)
+Non-exclusive; after recording completes, write the file info into the recordings table.
 """
 
 import mk_logger
@@ -10,9 +10,9 @@ from py_plugin import PluginBase
 class RecordMp4Logger(PluginBase):
     name        = "record_mp4_logger"
     version     = "1.0.0"
-    description = "MP4 录像完成后自动将录像信息写入数据库，供录像管理页面查询。"
+    description = "After MP4 recording completes, automatically writes the recording info into the database for querying on the recordings management page."
     type        = "on_record_mp4"
-    interruptible = False  # 监听型：写库后继续执行其他插件
+    interruptible = False  # listening type: after writing to DB, continue executing other plugins
 
     def run(self, **kwargs) -> bool:
         info = kwargs.get("info", {})
@@ -22,9 +22,9 @@ class RecordMp4Logger(PluginBase):
             from py_http_api import db
             db.add_recording(info)
             mk_logger.log_info(
-                f"[record_mp4_logger] 写库成功: {info.get('app')}/{info.get('stream')} "
+                f"[record_mp4_logger] DB write succeeded: {info.get('app')}/{info.get('stream')} "
                 f"{info.get('file_name')} size={info.get('file_size')}"
             )
         except Exception as e:
-            mk_logger.log_warn(f"[record_mp4_logger] 写库失败: {e}")
-        return False  # 非独占，继续派发后续插件
+            mk_logger.log_warn(f"[record_mp4_logger] DB write failed: {e}")
+        return False  # non-exclusive; continue dispatching to subsequent plugins

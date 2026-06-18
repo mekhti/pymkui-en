@@ -1,9 +1,9 @@
 """
-拉流代理内置插件
-包含两个默认启用的插件：
-  - pull_proxy_on_demand   : 处理 on_stream_not_found，实现按需拉流
-  - pull_proxy_failover    : 处理 on_player_proxy_failed，实现多地址故障转移
-两个插件在数据库初始化时会自动插入默认绑定记录（INSERT OR IGNORE）。
+Pull Proxy built-in plugins
+Contains two plugins enabled by default:
+  - pull_proxy_on_demand   : handles on_stream_not_found, implementing on-demand pull
+  - pull_proxy_failover    : handles on_player_proxy_failed, implementing multi-address failover
+Both plugins automatically insert default binding records on database initialization (INSERT OR IGNORE).
 """
 
 import mk_loader
@@ -13,13 +13,13 @@ from py_plugin import PluginBase
 
 class PullProxyOnDemand(PluginBase):
     """
-    按需拉流插件（on_stream_not_found）
-    当播放器请求的流不存在时，查询数据库中匹配的 on_demand=1 代理，
-    触发拉流并让 ZLM 等待流上线后再推送给播放器。
+    On-demand pull plugin (on_stream_not_found)
+    When the stream requested by the player doesn't exist, query the matching on_demand=1 proxy in the database,
+    trigger the pull and let ZLM wait for the stream to come online before pushing it to the player.
     """
     name = "pull_proxy_on_demand"
     version = "1.0.0"
-    description = "按需拉流插件，流不存在时自动触发拉流代理（on_demand=1）。默认启用，不建议禁用。"
+    description = "On-demand pull plugin; automatically triggers the pull proxy when the stream doesn't exist (on_demand=1). Enabled by default; disabling is not recommended."
     type = "on_stream_not_found"
     interruptible = True
 
@@ -40,7 +40,7 @@ class PullProxyOnDemand(PluginBase):
             row = db.cursor.fetchone()
             proxy = dict(row) if row else None
         except Exception as e:
-            mk_logger.log_warn(f"[pull_proxy_on_demand] 查询数据库失败: {e}")
+            mk_logger.log_warn(f"[pull_proxy_on_demand] Failed to query the database: {e}")
             proxy = None
 
         if not proxy:
@@ -53,24 +53,24 @@ class PullProxyOnDemand(PluginBase):
         url_params = first_url.get("params", {})
 
         if not url:
-            mk_logger.log_warn(f"[pull_proxy_on_demand] 按需代理无有效地址 id={pid}")
+            mk_logger.log_warn(f"[pull_proxy_on_demand] On-demand proxy has no valid address id={pid}")
             return False
 
         vhost, app, stream, url, retry_count, timeout_sec, opt = _mk._build_proxy_call_args(
             proxy, url, url_params
         )
         mk_logger.log_info(
-            f"[pull_proxy_on_demand] 触发按需拉流 id={pid} {vhost}/{app}/{stream} url={url}"
+            f"[pull_proxy_on_demand] Triggering on-demand pull id={pid} {vhost}/{app}/{stream} url={url}"
         )
 
         def cb(err, key):
             if err:
                 mk_logger.log_warn(
-                    f"[pull_proxy_on_demand] 按需拉流失败 id={pid} {vhost}/{app}/{stream}: {err}"
+                    f"[pull_proxy_on_demand] On-demand pull failed id={pid} {vhost}/{app}/{stream}: {err}"
                 )
             else:
                 mk_logger.log_info(
-                    f"[pull_proxy_on_demand] 按需拉流成功 id={pid} {vhost}/{app}/{stream}"
+                    f"[pull_proxy_on_demand] On-demand pull succeeded id={pid} {vhost}/{app}/{stream}"
                 )
 
         opt['auto_close'] = True
@@ -86,12 +86,12 @@ class PullProxyOnDemand(PluginBase):
 
 class PullProxyFailover(PluginBase):
     """
-    多地址故障转移插件（on_player_proxy_failed）
-    当拉流代理失败时，自动切换到下一个备用地址（循环）。
+    Multi-address failover plugin (on_player_proxy_failed)
+    When the pull proxy fails, automatically switch to the next backup address (cyclically).
     """
     name = "pull_proxy_failover"
     version = "1.0.0"
-    description = "拉流代理多地址故障转移插件，拉流失败时自动切换备用地址。默认启用，不建议禁用。"
+    description = "Pull Proxy multi-address failover plugin; automatically switches to a backup address when the pull fails. Enabled by default; disabling is not recommended."
     type = "on_player_proxy_failed"
     interruptible = True
 
@@ -142,28 +142,28 @@ class PullProxyFailover(PluginBase):
                 return False
 
             mk_logger.log_info(
-                f"[pull_proxy_failover] 切换备用地址 id={pid} {vhost}/{app}/{stream} "
+                f"[pull_proxy_failover] Switching to backup address id={pid} {vhost}/{app}/{stream} "
                 f"[{current_idx}→{next_idx}] {url} → {next_url}"
             )
             mk_loader.update_stream_proxy(vhost, app, stream, next_url, next_params)
             return True
 
         except Exception as e:
-            mk_logger.log_warn(f"[pull_proxy_failover] 多地址切换异常: {e}")
+            mk_logger.log_warn(f"[pull_proxy_failover] Multi-address switch exception: {e}")
 
         return False
 
 
 class PullProxyRestore(PluginBase):
     """
-    启动恢复插件（on_start）
-    ZLMediaKit 启动时，从数据库读取所有 on_demand=0 的拉流代理，
-    调用 mk_loader.add_stream_proxy 重新注册，恢复上次运行状态。
-    非独占，允许其他 on_start 插件同时运行。
+    Startup-restore plugin (on_start)
+    When ZLMediaKit starts, read all on_demand=0 pull proxies from the database,
+    call mk_loader.add_stream_proxy to re-register, restoring the previous run state.
+    Non-exclusive; allows other on_start plugins to run simultaneously.
     """
     name = "pull_proxy_restore"
     version = "1.0.0"
-    description = "启动时自动恢复非按需拉流代理。默认启用，不建议禁用。"
+    description = "Automatically restores non-on-demand pull proxies at startup. Enabled by default; disabling is not recommended."
     type = "on_start"
     interruptible = False
 
@@ -174,7 +174,7 @@ class PullProxyRestore(PluginBase):
         try:
             proxies = db.get_all_pull_proxies()
         except Exception as e:
-            mk_logger.log_warn(f"[pull_proxy_restore] 读取数据库失败: {e}")
+            mk_logger.log_warn(f"[pull_proxy_restore] Failed to read the database: {e}")
             return False
 
         count = 0
@@ -193,7 +193,7 @@ class PullProxyRestore(PluginBase):
             url_params = first_url.get("params", {})
 
             if not app or not stream or not url:
-                mk_logger.log_warn(f"[pull_proxy_restore] 跳过无效记录 id={proxy_id}")
+                mk_logger.log_warn(f"[pull_proxy_restore] Skipping invalid record id={proxy_id}")
                 continue
 
             vhost, app, stream, url, retry_count, timeout_sec, opt = _mk._build_proxy_call_args(
@@ -204,16 +204,16 @@ class PullProxyRestore(PluginBase):
                 def cb(err, key):
                     if err:
                         mk_logger.log_warn(
-                            f"[pull_proxy_restore] 恢复失败 id={pid} {v}/{a}/{s}: {err}"
+                            f"[pull_proxy_restore] Restore failed id={pid} {v}/{a}/{s}: {err}"
                         )
                     else:
                         mk_logger.log_info(
-                            f"[pull_proxy_restore] 恢复成功 id={pid} {v}/{a}/{s} url={u}"
+                            f"[pull_proxy_restore] Restore succeeded id={pid} {v}/{a}/{s} url={u}"
                         )
                 return cb
 
             mk_logger.log_info(
-                f"[pull_proxy_restore] 恢复拉流代理 id={proxy_id} {vhost}/{app}/{stream} url={url} "
+                f"[pull_proxy_restore] Restoring pull proxy id={proxy_id} {vhost}/{app}/{stream} url={url} "
                 f"retry_count={retry_count} timeout_sec={timeout_sec}"
             )
             mk_loader.add_stream_proxy(
@@ -226,5 +226,5 @@ class PullProxyRestore(PluginBase):
             )
             count += 1
 
-        mk_logger.log_info(f"[pull_proxy_restore] 共恢复 {count} 个拉流代理")
-        return False  # 非独占，始终返回 False 让其他 on_start 插件继续执行
+        mk_logger.log_info(f"[pull_proxy_restore] Restored {count} pull proxies in total")
+        return False  # non-exclusive; always returns False to let other on_start plugins continue
